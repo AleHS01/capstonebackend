@@ -5,6 +5,7 @@ const passport = require("../config/passport");
 router.use("/login", require("./login"));
 router.use("/signup", require("./signup"));
 router.use("/auth", require("./auth"));
+router.use("/logout", require("./logout"));
 
 router.get(
   "/google/callback",
@@ -14,7 +15,7 @@ router.get(
     const accessToken = req.user.accessToken;
     console.log("Access Token", accessToken);
     console.log("User", req.user);
-    res.redirect("/");
+    res.redirect("/api/auth/me");
   }
 );
 
