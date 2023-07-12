@@ -1,9 +1,16 @@
 const router = require("express").Router();
 
-router.post("/", (req, res, next) => {
-  req.logout();
-
-  res.redirect("/login");
+router.get("/", (req, res, next) => {
+  req.logout((error) => {
+    if (error) {
+      return next(error);
+    }
+    res.redirect("/api/login");
+  });
 });
+
+// router.get("/", (req, res, next) => {
+//   res.status(200).send("Log out sucess");
+// });
 
 module.exports = router;
