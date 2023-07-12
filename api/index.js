@@ -1,7 +1,7 @@
 const router = require("express").Router();
 
 //Mount API
-// router.use("/login", require("./login"));
+router.use("/login", require("./login"));
 router.use("/signup", require("./signup"));
 
 // 404 Handling
