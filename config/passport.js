@@ -30,23 +30,27 @@ passport.use(
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: "http://localhost:8080/api/google/callback", // adjust as necessary
     },
-    function (accessToken, refreshToken, profile, cb) {
-      User.findOrCreate({
-        where: { googleId: profile.id },
-        defaults: {
-          username: profile.displayName,
-          email: profile.emails[0].value,
-        },
-      })
-        .then(([user, created]) => {
-          // user - the found or created user object
-          // created - a boolean indicating whether the user was created or found
-
-          return cb(null, user);
-        })
-        .catch((err) => {
-          return cb(err);
+    async (accessToken, refreshToken, profile, cb) => {
+      console.log("Profile:\n", profile);
+      try {
+        //Check if user with the given Google ID already exists
+        const existingUser = await User.findOne({
+          where: { googleId: profile.id },
         });
+        if (existingUser) {
+          return cb(null, existingUser);
+        } else {
+          //Create a new user using the Google profile data
+          const newUser = await User.create({
+            username: profile.displayName,
+            email: profile.emails[0].value,
+            googleId: profile.id,
+          });
+          return cb(null, newUser);
+        }
+      } catch (error) {
+        return cb(error);
+      }
     }
   )
 );

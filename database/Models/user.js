@@ -17,11 +17,11 @@ const User = db.define(
     },
     password: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true, //when working with google-auth
       //unique: true
     },
     googleId: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       allowNull: true,
     },
   },
