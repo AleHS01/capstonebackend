@@ -24,13 +24,14 @@ const configuration = new Configuration({
   // setting up plaid client
   const plaidClient = new PlaidApi(configuration)
 
-router.post('/create_link_token', ensureAuthenticated, async (req, res, next) => {
+router.post('/create_link_token/:id', ensureAuthenticated, async (req, res, next) => {
     const user = req.user
+    const id = req.params.id
     //console.log("console logged here:", user)
 
     const request = {
         user: {
-            client_user_id: user.id.toString()
+            client_user_id: id.toString()
         },
         client_name: 'Finance Mate',
         products: ['auth'],

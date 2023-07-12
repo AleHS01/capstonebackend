@@ -24,7 +24,7 @@ router.post("/", (req, res, next) => {
       }
 
       // If the user was logged in successfully, send a 200 OK HTTP status code and a success message.
-      return res.status(200).send("User logged in");
+      return res.status(200).json({user});
     });
   })(req, res, next); // This invocation runs the authenticate middleware for the request.
 });
