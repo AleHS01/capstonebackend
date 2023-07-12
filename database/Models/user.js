@@ -24,6 +24,10 @@ const User = db.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    plaidAccessToken: {
+      type: DataTypes.STRING,
+      allowNull: true
+    }
   },
   {
     hooks: {

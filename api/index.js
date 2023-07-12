@@ -6,6 +6,7 @@ router.use("/login", require("./login"));
 router.use("/signup", require("./signup"));
 router.use("/auth", require("./auth"));
 router.use("/logout", require("./logout"));
+router.use("/plaid", require('./plaid'))
 
 router.get(
   "/google/callback",

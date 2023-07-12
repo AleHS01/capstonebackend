@@ -6,6 +6,7 @@ const PORT = 8080;
 const session = require("express-session");
 const db = require("./database/db.js");
 const SequelizeStore = require("connect-session-sequelize")(session.Store);
+const {Configuration, PlaidApi, PlaidEnvironments}= require('plaid')
 app.use(cors());
 require("dotenv").config();
 
@@ -13,6 +14,22 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const sessionStore = new SequelizeStore({ db });
+
+const configuration = new Configuration({
+  basePath: PlaidEnvironments.sandbox,
+  baseOptions: {
+    headers: {
+      'PLAID-CLIENT-ID': process.env.CLIENT_ID,
+      'PLAID-SECRET': process.env.SECRET,
+    },
+  },
+
+})
+
+
+// setting up plaid client
+const plaidClient = new PlaidApi(configuration)
+console.log(plaidClient)
 
 // express-session middleware
 app.use(
@@ -41,6 +58,6 @@ const runServer = async () => {
     console.log("Live on port 8080.");
   });
 };
-
+console.log(plaidClient)
 runServer();
-module.exports = app;
+module.exports = {app, plaidClient};
