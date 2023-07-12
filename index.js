@@ -20,11 +20,12 @@ app.use(require('express-session')({
 app.use(passport.initialize())
 app.use(passport.session())
 
+app.use("/api", require("./api"));
+
 app.get("/", (req, res) => {
   res.send("server up and running :)");
 });
 
-// app.use("/api", require("./api"));
 
 const runServer = async () => {
   await db.sync();
