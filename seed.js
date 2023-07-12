@@ -9,4 +9,4 @@ const seed = async () => {
     await User.bulkCreate(seedUser);
   };
 
-  seed().then(()=>process.exit);
+  seed().then(()=>process.exit());
