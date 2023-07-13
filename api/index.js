@@ -2,22 +2,26 @@ const router = require("express").Router();
 const passport = require("../config/passport");
 
 //midleware
-const ensureAuthenticated = (req, res, next) => {
-  console.log("is auth? ", req.isAuthenticated());
-  if (req.isAuthenticated()) {
-    console.log("Is authenticated");
-    return next();
-  }
-  console.log("Is NOT authenticated");
-  res.status(401).json({ message: "Unauthorized User" });
-};
 
 //Mount API
 router.use("/login", require("./login"));
 router.use("/signup", require("./signup"));
 router.use("/auth", require("./auth"));
 router.use("/logout", require("./logout"));
+
+const ensureAuthenticated = async (req, res, next) => {
+  console.log("is auth? ", await req.isAuthenticated());
+  // console.log("Req\n", req);
+  if (await req.isAuthenticated()) {
+    console.log("Is authenticated");
+    next();
+  }
+  console.log("Is NOT authenticated");
+  res.status(401).json({ message: "Unauthorized User" });
+};
+
 router.use("/plaid", ensureAuthenticated, require("./plaid"));
+// router.use("/plaid", require("./plaid"));
 
 router.get(
   "/google/callback",

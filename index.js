@@ -69,6 +69,10 @@ const session = require("express-session");
 const db = require("./database/db.js");
 const SequelizeStore = require("connect-session-sequelize")(session.Store);
 const { Configuration, PlaidApi, PlaidEnvironments } = require("plaid");
+const LocalStrategy = require("passport-local").Strategy;
+const User = require("./database/Models/user");
+const bcrypt = require("bcrypt");
+
 app.use(cors());
 require("dotenv").config();
 
@@ -89,14 +93,36 @@ const configuration = new Configuration({
 
 const plaidClient = new PlaidApi(configuration);
 
+passport.use(
+  new LocalStrategy(async (username, password, done) => {
+    try {
+      const user = await User.findOne({ where: { username } });
+      if (!user) {
+        return done(null, false, { message: "User Not found!" });
+      }
+      const validUser = await bcrypt.compare(password, user.password);
+      if (!validUser) {
+        return done(null, false, { message: "Invalid password" });
+      }
+      return done(null, user);
+    } catch (error) {
+      done(error);
+    }
+  })
+);
+
 // express-session middleware
 app.use(
   session({
     secret: "secret",
     store: sessionStore,
-    resave: false,
+    resave: true,
     saveUninitialized: false,
-    cookie: { maxAge: 4 * 60 * 60 * 1000 }, //fours hours
+    name: "FinanceMate",
+    cookie: {
+      maxAge: 4 * 60 * 60 * 1000,
+      // secure: false,
+    }, //fours hours
   })
 );
 
@@ -111,6 +137,7 @@ app.get("/", (req, res) => {
 });
 
 const runServer = async () => {
+  // await sessionStore.sync();
   await db.sync();
   app.listen(PORT, () => {
     console.log("Live on port 8080.");

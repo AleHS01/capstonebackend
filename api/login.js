@@ -32,6 +32,7 @@ const passport = require("passport");
 
 router.post("/", (req, res, next) => {
   console.log("Login Happening Here");
+  console.log("Haders\n", req.headers);
   passport.authenticate("local", (error, user, info) => {
     if (error) {
       return next(error);
@@ -43,6 +44,9 @@ router.post("/", (req, res, next) => {
       if (error) {
         return next(error);
       }
+      req.session.save();
+      // console.log("Req.user: ", req.user);
+      console.log("Passport user: \n", req.session.passport);
       return res.status(200).json({ user });
     });
     console.log("This is The user that just log in", user);
