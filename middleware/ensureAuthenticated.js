@@ -1,10 +1,8 @@
-const passport = require('../config/passport')
-const ensureAuthenticated = (req, res,next) => {
-    if(req.isAuthenticated()){
-        return next()
-    }
-    res.redirect('/login')
+const ensureAuthenticated = (req, res, next) => {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.status(401).json({ message: "Unauthorized User" });
+};
 
-}
-
-module.exports = ensureAuthenticated
+module.exports = ensureAuthenticated;

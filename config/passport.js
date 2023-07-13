@@ -56,12 +56,14 @@ passport.use(
 );
 
 passport.serializeUser((user, done) => {
+  console.log("serialize user works, user id:", user.id);
   done(null, user.id);
 });
 
 passport.deserializeUser((id, done) => {
   User.findByPk(id)
     .then((user) => {
+      console.log("Deserialize user works, user id:", user.id);
       done(null, user);
     })
     .catch((error) => {
