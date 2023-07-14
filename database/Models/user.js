@@ -1,6 +1,6 @@
 const { DataTypes } = require("sequelize");
 const db = require("../db");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 
 const User = db.define(
   "Users",
@@ -26,13 +26,16 @@ const User = db.define(
     },
     plaidAccessToken: {
       type: DataTypes.STRING,
-      allowNull: true
-    }
+      allowNull: true,
+    },
+    plaidItemId: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   },
   {
     hooks: {
       beforeCreate: async (user) => {
-        console.log("inside beforecreate");
         if (user.password) {
           const salt = await bcrypt.genSalt(10);
           user.password = await bcrypt.hash(user.password, salt);

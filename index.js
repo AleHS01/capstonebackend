@@ -1,63 +1,61 @@
 const express = require("express");
-const passport = require("./config/passport");
 const cors = require("cors");
-const app = express();
-const PORT = 8080;
+const passport = require("passport");
+const passportLocalStrategy = require("passport-local").Strategy;
+const cookieParser = require("cookie-parser");
+const bycrypt = require("bcryptjs");
 const session = require("express-session");
-const db = require("./database/db.js");
+const bodyParser = require("body-parser");
+const db = require("./database/db");
 const SequelizeStore = require("connect-session-sequelize")(session.Store);
-const {Configuration, PlaidApi, PlaidEnvironments}= require('plaid')
-app.use(cors());
-require("dotenv").config();
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+const app = express();
 
 const sessionStore = new SequelizeStore({ db });
 
-const configuration = new Configuration({
-  basePath: PlaidEnvironments.sandbox,
-  baseOptions: {
-    headers: {
-      'PLAID-CLIENT-ID': process.env.CLIENT_ID,
-      'PLAID-SECRET': process.env.SECRET,
-    },
-  },
+//--------------------------Imports Done-----------
 
-})
-
-
-// setting up plaid client
-const plaidClient = new PlaidApi(configuration)
-console.log(plaidClient)
-
-// express-session middleware
+// MiddleWare
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(
-  require("express-session")({
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  })
+);
+app.use(
+  session({
     secret: "secret",
     store: sessionStore,
-    resave: false,
-    saveUninitialized: false,
-    cookie: { maxAge: 4 * 60 * 60 * 1000 }, //fours hours
+    resave: true,
+    saveUninitialized: true,
+    cookie: { maxAge: 4 * 60 * 60 * 1000 },
   })
 );
 
-// Initialize passport middleware
 app.use(passport.initialize());
 app.use(passport.session());
+require("./config/passportConfig")(passport); //to use same instance of passport in the entire server
 
-app.use("/api", require("./api"));
+app.use(cookieParser("secret"));
 
-app.get("/", (req, res) => {
-  res.send("server up and running :)");
-});
+//------------------------Middleware Done----------------------
 
-const runServer = async () => {
-  await db.sync();
-  app.listen(PORT, () => {
-    console.log("Live on port 8080.");
+//Mounting Routes
+app.use("/api", require("./api")(passport));
+
+//Start Server
+const serverRun = () => {
+  app.listen(process.env.PORT, () => {
+    console.log(`Live on port: ${process.env.PORT}`);
   });
 };
-console.log(plaidClient)
-runServer();
-module.exports = {app, plaidClient};
+
+async function main() {
+  await sessionStore.sync();
+  await db.sync();
+  await serverRun();
+}
+
+main();

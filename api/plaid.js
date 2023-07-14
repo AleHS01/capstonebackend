@@ -1,51 +1,86 @@
 const router = require("express").Router();
-// const {plaidClient} = require('../index')
-// console.log("my plaidClient",plaidClient)
-const { Configuration, PlaidApi, PlaidEnvironments } = require("plaid");
-//const { LinkTokenCreateRequest } = plaidClient;
-
-const User = require("../database/Models/user");
 require("dotenv").config();
-const ensureAuthenticated = require("../middleware/ensureAuthenticated");
+const plaid = require("plaid");
+const authenticateUser = require("../middleware/authenticateUser");
+const User = require("../database/Models/User");
+const { Configuration, PlaidApi, PlaidEnvironments } = require("plaid");
 
 const configuration = new Configuration({
-  basePath: PlaidEnvironments.sandbox,
+  basePath: PlaidEnvironments.development,
   baseOptions: {
     headers: {
-      "PLAID-CLIENT-ID": process.env.CLIENT_ID,
-      "PLAID-SECRET": process.env.SECRET,
+      "PLAID-CLIENT-ID": process.env.PLAID_CLIENT_ID,
+      "PLAID-SECRET": process.env.PLAID_SECRET,
+      //   "Plaid-Version": "2020-09-14",
     },
   },
 });
 
-// setting up plaid client
-const plaidClient = new PlaidApi(configuration);
+const client = new PlaidApi(configuration);
 
-router.post(
-  "/create_link_token",
-  ensureAuthenticated,
-  async (req, res, next) => {
+router.post("/create_link_token", authenticateUser, async (req, res, next) => {
+  try {
     const user = req.user;
-    // const id = req.params.id
-    //console.log("console logged here:", user)
 
-    const request = {
+    const response = await client.linkTokenCreate({
       user: {
         client_user_id: user.id.toString(),
       },
       client_name: "Finance Mate",
-      products: ["auth"],
+      products: ["auth", "transactions"],
       country_codes: ["US"],
       language: "en",
-    };
+      redirect_uri: "http://localhost:3000/dashboard",
+      account_filters: {
+        depository: {
+          account_subtypes: ["checking", "savings"],
+        },
+      },
+    });
+    console.log("Link Token Response", response.data);
+    const link_token = response.data.link_token;
+    res.json({ link_token });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
 
+router.post(
+  "/exchange_public_token",
+  authenticateUser,
+  async (req, res, next) => {
     try {
-      const createTokenResponse = await plaidClient.linkTokenCreate(request);
-      res.json(createTokenResponse.data);
+      const response = await client.itemPublicTokenExchange(
+        req.body.public_token
+      );
+
+      const user = await User.findByPk(req.user.id);
+      const access_token = response.data.access_token;
+      const itemId = response.data.item_id;
+
+      user.plaidAccessToken = access_token;
+      user.plaidItemId = itemId;
+
+      user.save();
+      console.log(response.data);
     } catch (error) {
-      console.log(error); // for debugging
+      console.log(error);
       next(error);
     }
   }
 );
+
+router.post("/accounts_balance", authenticateUser, async (req, res, next) => {
+  try {
+    const response = await client.accountsBalanceGet(req.body.access_token);
+    const accounts = response.data.accounts;
+    console.log(accounts);
+    res.json({ accounts });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
+
 module.exports = router;
