@@ -1,15 +1,27 @@
-const User = require("../database/Models/user");
 const router = require("express").Router();
+const User = require("../database/Models/User");
+const bycrypt = require("bcryptjs");
 
 router.post("/", async (req, res, next) => {
+  const { username, password, email } = req.body;
+
   try {
-    const user = await User.create(req.body);
-    if (!user) {
-      return res.status(400).send("User Not Created");
+    const existingUser = await User.findOne({ where: { username } });
+
+    if (existingUser) {
+      res.send("User Already Exists");
+    } else {
+      await User.create({
+        username: username,
+        email: email,
+        password: password,
+      });
+
+      res.send("User Created");
     }
-    return res.status(200).send("User Created Successfully");
   } catch (error) {
     next(error);
   }
 });
+
 module.exports = router;
