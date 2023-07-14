@@ -2,7 +2,7 @@ const router = require("express").Router();
 require("dotenv").config();
 const plaid = require("plaid");
 const authenticateUser = require("../middleware/authenticateUser");
-const User = require("../database/Models/User");
+const User = require("../database/Models/user");
 const { Configuration, PlaidApi, PlaidEnvironments } = require("plaid");
 
 const configuration = new Configuration({
@@ -30,12 +30,12 @@ router.post("/create_link_token", authenticateUser, async (req, res, next) => {
       products: ["auth", "transactions"],
       country_codes: ["US"],
       language: "en",
-      redirect_uri: "http://localhost:3000/dashboard",
-      account_filters: {
-        depository: {
-          account_subtypes: ["checking", "savings"],
-        },
-      },
+      // redirect_uri: "http://localhost:3000/dashboard",
+      // account_filters: {
+      //   depository: {
+      //     account_subtypes: ["checking", "savings"],
+      //   },
+      // },
     });
     console.log("Link Token Response", response.data);
     const link_token = response.data.link_token;
