@@ -6,7 +6,7 @@ const User = require("../database/Models/user");
 const { Configuration, PlaidApi, PlaidEnvironments } = require("plaid");
 
 const configuration = new Configuration({
-  basePath: PlaidEnvironments.development,
+  basePath: PlaidEnvironments.sandbox,
   baseOptions: {
     headers: {
       "PLAID-CLIENT-ID": process.env.PLAID_CLIENT_ID,
@@ -50,22 +50,27 @@ router.post(
   "/exchange_public_token",
   authenticateUser,
   async (req, res, next) => {
+    const public_token = req.body.public_token
     try {
-      const response = await client.itemPublicTokenExchange(
-        req.body.public_token
-      );
+      const response = await client.itemPublicTokenExchange({
+        public_token: public_token
+      });
 
       const user = await User.findByPk(req.user.id);
       const access_token = response.data.access_token;
       const itemId = response.data.item_id;
 
+      console.log("Access Token Response", response.data);
+
       user.plaidAccessToken = access_token;
       user.plaidItemId = itemId;
+      res.send(access_token)
 
       user.save();
+      // res.redirect('/login')
       console.log(response.data);
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       next(error);
     }
   }
