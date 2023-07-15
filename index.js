@@ -53,6 +53,7 @@ const serverRun = () => {
 };
 
 async function main() {
+  console.log("This is going to print models: ", db.models);
   await sessionStore.sync();
   await db.sync();
   await serverRun();
