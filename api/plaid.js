@@ -76,12 +76,17 @@ router.post(
   }
 );
 
-router.post("/accounts_balance", authenticateUser, async (req, res, next) => {
+router.post("/accounts", authenticateUser, async (req, res, next) => {
+  const user = await User.findByPk(req.user.id)
+  const access_token = user.plaidAccessToken
+  console.log(access_token)
   try {
-    const response = await client.accountsBalanceGet(req.body.access_token);
+    const response = await client.accountsGet({
+      access_token: access_token
+    });
     const accounts = response.data.accounts;
     console.log(accounts);
-    res.json({ accounts });
+    res.json({ accounts});
   } catch (error) {
     console.log(error);
     next(error);
