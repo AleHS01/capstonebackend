@@ -3,7 +3,7 @@ const db = require("../db");
 const bcrypt = require("bcryptjs");
 
 const User = db.define(
-  "Users",
+  "User",
   {
     username: {
       type: DataTypes.STRING,
@@ -59,5 +59,4 @@ const User = db.define(
     },
   }
 );
-
 module.exports = User;

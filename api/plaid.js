@@ -2,7 +2,7 @@ const router = require("express").Router();
 require("dotenv").config();
 const plaid = require("plaid");
 const authenticateUser = require("../middleware/authenticateUser");
-const User = require("../database/Models/user");
+const User = require("../database/Models");
 const { Configuration, PlaidApi, PlaidEnvironments } = require("plaid");
 
 const configuration = new Configuration({
@@ -50,10 +50,10 @@ router.post(
   "/exchange_public_token",
   authenticateUser,
   async (req, res, next) => {
-    const public_token = req.body.public_token
+    const public_token = req.body.public_token;
     try {
       const response = await client.itemPublicTokenExchange({
-        public_token: public_token
+        public_token: public_token,
       });
 
       const user = await User.findByPk(req.user.id);
@@ -64,7 +64,7 @@ router.post(
 
       user.plaidAccessToken = access_token;
       user.plaidItemId = itemId;
-      res.send(access_token)
+      res.send(access_token);
 
       user.save();
       // res.redirect('/login')
