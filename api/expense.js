@@ -2,7 +2,7 @@ const router = require("express").Router();
 const { User, Expense } = require("../database/Models");
 const bodyParser = require("body-parser");
 
-router.get("/", async (req, res, next) => {
+router.post("/get", async (req, res, next) => {
   //req.user stores  the entire user that has been authenticated inside of it
   const expenses = await Expense.findAll({ where: { UserId: req.user.id } });
 
