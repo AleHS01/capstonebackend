@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { User, Expense } = require("../database/Models");
+const authenticateUser = require("../middleware/authenticateUser");
 
 module.exports = (passport) => {
   // router.post("/", (req, res, next) => {
@@ -33,9 +34,10 @@ module.exports = (passport) => {
         if (error) {
           return next(error);
         }
+        console.log("req.user inside req.logIn:", req.user);
         User.findByPk(req.user.id, { include: Expense })
           .then((user) => {
-            res.status(200).json({ user });
+            res.status(200).json(user);
             console.log("Just Logged In User", user);
           })
           .catch((error) => {
@@ -43,6 +45,7 @@ module.exports = (passport) => {
             next(error);
           });
       });
+      console.log("------------req.user in login--------:\n", req.user);
     })(req, res, next);
   });
 
