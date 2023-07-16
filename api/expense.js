@@ -40,16 +40,4 @@ router.put("/:id", bodyParser.json(), async (req, res, next) => {
   }
 });
 
-// router.put("/", bodyParser.json(), async (req, res, next) => {
-//     try {
-//       console.log(req.body);
-//       //array of expenses expected from the form
-//       const newExpense = await Expense.bulkCreate(req.body);
-//       res.status(201).json(newExpense);
-//     } catch (error) {
-//       console.log(error);
-//       next(error);
-//     }
-//   });
-
 module.exports = router;
