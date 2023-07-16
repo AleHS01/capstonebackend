@@ -25,6 +25,20 @@ router.post("/", bodyParser.json(), async (req, res, next) => {
     next(error);
   }
 });
+router.put("/:id", bodyParser.json(), async (req, res, next) => {
+  try {
+    console.log(req.body); //expected a expense object
+
+    const updateExpense = await Expense.findByPk(req.body.id);
+    updateExpense.expense_name = req.body.expense_name;
+    updateExpense.expense_value = req.body.expense_value;
+    updateExpense.save();
+    res.status(201).json(updateExpense);
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
 
 // router.put("/", bodyParser.json(), async (req, res, next) => {
 //     try {
