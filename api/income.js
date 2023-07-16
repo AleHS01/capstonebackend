@@ -17,8 +17,8 @@ router.post("/", bodyParser.json(), async (req, res, next) => {
       ...income,
       UserId: req.user.id,
     }));
-    console.log("new Expenses with Id:\n", newIncomeData);
-    const newIncome = await Expense.bulkCreate(newIncomeData);
+    console.log("new Income with Id:\n", newIncomeData);
+    const newIncome = await Income.bulkCreate(newIncomeData);
     res.status(201).json(newIncome);
   } catch (error) {
     console.log(error);
