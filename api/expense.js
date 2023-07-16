@@ -1,4 +1,5 @@
 const router = require("express").Router();
+const e = require("express");
 const { User, Expense } = require("../database/Models");
 const bodyParser = require("body-parser");
 
@@ -17,14 +18,46 @@ router.post("/", bodyParser.json(), async (req, res, next) => {
       ...expense,
       UserId: req.user.id,
     }));
+
+    // for (let i = 0; i < newExpensesData.length; i++) {
+    //   const expense = newExpensesData[i];
+    //   //if expense.id is defined then: find an updated
+    //   if (expense.id) {
+    //     const updateExpense = await Expense.findByPk(expense.id);
+
+    //     updateExpense.expense_name = expense.expense_name;
+    //     updateExpense.expense_value = expense.expense_value;
+
+    //     updateExpense.save();
+    //   } else {
+    //     //if is is not in the db (dont have an id) then create
+    //     await Expense.create(expense);
+    //   }
+    // }
+    for (const expense of newExpensesData) {
+      // If expense.id is defined then update
+      if (expense.id) {
+        const updateExpense = await Expense.findByPk(expense.id);
+
+        updateExpense.expense_name = expense.expense_name;
+        updateExpense.expense_value = expense.expense_value;
+
+        await updateExpense.save();
+      } else {
+        // If it doesn't have an id, then create a new record
+        await Expense.create(expense);
+      }
+    }
+
     console.log("new Expenses with Id:\n", newExpensesData);
-    const newExpenses = await Expense.bulkCreate(newExpensesData);
-    res.status(201).json(newExpenses);
+    // const newExpenses = await Expense.bulkCreate(newExpensesData);
+    res.status(201).json(newExpensesData);
   } catch (error) {
     console.log(error);
     next(error);
   }
 });
+
 router.put("/:id", bodyParser.json(), async (req, res, next) => {
   try {
     console.log(req.body); //expected a expense object
@@ -39,17 +72,5 @@ router.put("/:id", bodyParser.json(), async (req, res, next) => {
     next(error);
   }
 });
-
-// router.put("/", bodyParser.json(), async (req, res, next) => {
-//     try {
-//       console.log(req.body);
-//       //array of expenses expected from the form
-//       const newExpense = await Expense.bulkCreate(req.body);
-//       res.status(201).json(newExpense);
-//     } catch (error) {
-//       console.log(error);
-//       next(error);
-//     }
-//   });
 
 module.exports = router;
