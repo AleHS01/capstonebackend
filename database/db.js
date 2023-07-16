@@ -6,7 +6,7 @@ const pg = require("pg");
 //   logging: false,
 //   dialectModule: pg,
 // });
-const db = new Sequelize('postgres://localhost:5432/capstone_database')
+const db = new Sequelize('postgres://localhost:5432/capstonedatabase')
 
 //Test Conection
 db.authenticate()
