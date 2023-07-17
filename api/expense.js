@@ -1,16 +1,16 @@
 const router = require("express").Router();
-const e = require("express");
-const { User, Expense } = require("../database/Models");
+const { User, Expense, Budget } = require("../database/Models");
 const bodyParser = require("body-parser");
+const authenticateUser = require("../middleware/authenticateUser");
 
-router.post("/get", async (req, res, next) => {
+router.get("/getExpenses", authenticateUser, async (req, res, next) => {
   //req.user stores  the entire user that has been authenticated inside of it
   const expenses = await Expense.findAll({ where: { UserId: req.user.id } });
 
   res.status(200).json(expenses);
 });
 
-router.post("/", bodyParser.json(), async (req, res, next) => {
+router.post("/", bodyParser.json(), authenticateUser, async (req, res, next) => {
   try {
     console.log(req.body); // Array of expenses expected from the form
 
@@ -72,5 +72,38 @@ router.put("/:id", bodyParser.json(), async (req, res, next) => {
     next(error);
   }
 });
+
+router.post("/addExpense", authenticateUser, async(req, res, next) => {
+  try {
+    const { name, amount, budgetId } = req.body;  // we get budgetId from req.body
+
+    const userId = req.user.id;
+
+    const budget = await Budget.findByPk(budgetId);  // you find the budget using budgetId
+
+    if(!budget) {
+      return res.status(404).send('Budget not found');
+    }
+
+    // then you create the expense
+    const expense = await Expense.create({
+      expense_name: name,
+      expense_value: amount,
+      UserId: userId
+    });
+
+    // and associate the expense with the budget.
+    await budget.addExpense(expense);
+    await expense.reload();
+
+    // respond with the newly created expense
+    res.json(expense);
+
+  } catch (error) {
+    // pass the error to your error handling middleware
+    next(error);
+  }
+});
+
 
 module.exports = router;
