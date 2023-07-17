@@ -49,5 +49,34 @@ module.exports = (passport) => {
     })(req, res, next);
   });
 
+  router.get(
+    "/google",
+    passport.authenticate("google", { scope: ["email", "profile"] })
+  );
+
+  router.get(
+    "/google_callback",
+    passport.authenticate("google", {
+      failureRedirect: "http://localhost:3000/login/",
+      failureMessage: "Cannot login to Google, please try again later!",
+      successRedirect: "http://localhost:3000/login/success",
+    }),
+    function (req, res, next) {
+      // Successful authentication, redirect home.
+      console.log("req.user in google_callback:\n", req.user);
+      User.findByPk(req.user.id, { include: Expense })
+        .then((user) => {
+          res.status(200).json(user);
+          console.log("Just Logged In User", user);
+        })
+        .catch((error) => {
+          console.log(error);
+          next(error);
+        });
+      // res.send("login sucess with google");
+      // res.redirect("http://localhost:3000/user");
+    }
+  );
+
   return router;
 };
