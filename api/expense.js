@@ -51,7 +51,11 @@ router.post("/", bodyParser.json(), async (req, res, next) => {
 
     console.log("new Expenses with Id:\n", newExpensesData);
     // const newExpenses = await Expense.bulkCreate(newExpensesData);
-    res.status(201).json(newExpensesData);
+
+    //send back to frontend to update the state
+    const expenses = await Expense.findAll({ where: { UserId: req.user.id } });
+
+    res.status(201).json(expenses);
   } catch (error) {
     console.log(error);
     next(error);
@@ -62,11 +66,22 @@ router.put("/:id", bodyParser.json(), async (req, res, next) => {
   try {
     console.log(req.body); //expected a expense object
 
-    const updateExpense = await Expense.findByPk(req.body.id);
+    const updateExpense = await Expense.findByPk(req.params.id);
     updateExpense.expense_name = req.body.expense_name;
     updateExpense.expense_value = req.body.expense_value;
     updateExpense.save();
     res.status(201).json(updateExpense);
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
+
+router.delete("/:id", bodyParser.json(), async (req, res, next) => {
+  try {
+    const expenseToDelete = await Expense.findByPk(req.params.id);
+    await expenseToDelete.destroy();
+    res.status(201).send("Deleted Successful");
   } catch (error) {
     console.log(error);
     next(error);
