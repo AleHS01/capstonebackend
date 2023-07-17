@@ -21,4 +21,20 @@ router.post("/addBudget", authenticateUser, async (req,res,next) => {
     }
 })
 
+router.get("/budgetDetails", authenticateUser, async(req,res,next)=>{
+    try {
+        const userId = req.user.id;
+        const budgets = await Budget.findAll({
+            where: {
+                userId: userId
+            }
+        });
+        console.log(budgets)
+    return res.status(200).json(budgets)
+    } catch (error) {
+        console.log(error) 
+        next(error)
+    }
+})
+
 module.exports = router
