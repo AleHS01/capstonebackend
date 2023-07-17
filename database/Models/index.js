@@ -7,9 +7,11 @@ const Budget = require("./budget")
 User.hasMany(Expense);
 User.hasMany(Income)
 User.hasMany(Budget)
-Budget.hasOne(User)
+Budget.belongsTo(User)
 Expense.belongsTo(User);
 Income.belongsTo(User)
+Budget.hasMany(Expense)
+Expense.belongsTo(Budget)
 
 module.exports = {
   User,
