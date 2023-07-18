@@ -44,11 +44,21 @@ router.get("/budgetNames", authenticateUser, async (req, res, next) => {
       where: {
         userId: userId,
       },
-      attributes: ['id', 'budget_name']
+      attributes: ["id", "budget_name"],
     });
     console.log(budgets);
     return res.status(200).send(budgets);
   } catch (error) {
+    next(error);
+  }
+});
+
+router.delete("/:id", authenticateUser, async (req, res, next) => {
+  try {
+    const budget = await Budget.findByPk(req.params.id);
+    await budget.destroy();
+  } catch (error) {
+    console.log(error);
     next(error);
   }
 });
