@@ -13,10 +13,10 @@ const Expense = db.define("Expense", {
   UserId: {
     type: DataTypes.INTEGER,
     allowNull: true,
-    references: {
-      model: "Users",
-      key: "id",
-    },
+    // references: {
+    //   model: "Users",
+    //   key: "id",
+    // },
   },
 });
 
