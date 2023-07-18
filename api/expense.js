@@ -6,9 +6,13 @@ const { use } = require("passport");
 
 router.get("/getExpenses", authenticateUser, async (req, res, next) => {
   //req.user stores  the entire user that has been authenticated inside of it
-  const expenses = await Expense.findAll({ where: { UserId: req.user.id } });
+  try {
+    const expenses = await Expense.findAll({ where: { UserId: req.user.id } });
+    res.status(200).json(expenses);
+  } catch (error) {
+    console.log(error)
+  }
 
-  res.status(200).json(expenses);
 });
 
 router.post(
@@ -23,22 +27,6 @@ router.post(
         ...expense,
         UserId: req.user.id,
       }));
-
-      // for (let i = 0; i < newExpensesData.length; i++) {
-      //   const expense = newExpensesData[i];
-      //   //if expense.id is defined then: find an updated
-      //   if (expense.id) {
-      //     const updateExpense = await Expense.findByPk(expense.id);
-
-      //     updateExpense.expense_name = expense.expense_name;
-      //     updateExpense.expense_value = expense.expense_value;
-
-      //     updateExpense.save();
-      //   } else {
-      //     //if is is not in the db (dont have an id) then create
-      //     await Expense.create(expense);
-      //   }
-      // }
       for (const expense of newExpensesData) {
         // If expense.id is defined then update
         if (expense.id) {
@@ -110,14 +98,14 @@ router.post("/addExpense", authenticateUser, async (req, res, next) => {
   }
 });
 
-router.get('/totalExpenses', authenticateUser, async (req,res,next)=> {
+router.get('/totalExpenses/:budgetId', authenticateUser, async (req,res,next)=> {
+  const budgetId = req.params.budgetId
+  console.log(budgetId)
   try {
-    const userid = req.user.id
     const expenses = await Expense.findAll({where: 
-      {UserId: userid},
+      {BudgetId: budgetId},
     })
     console.log(expenses)
-    res.send("Got it")
 
     var total = 0.0
     expenses.forEach(function(item) {
@@ -125,7 +113,7 @@ router.get('/totalExpenses', authenticateUser, async (req,res,next)=> {
       total = total + parseFloat(item.expense_value)
     })
     console.log("total", total)
-    res.status(200).send(total)
+    res.status(200).json(total)
     
   } catch (error) {
     console.log(error)
