@@ -56,13 +56,24 @@ router.put("/:id", bodyParser.json(), async (req, res, next) => {
   try {
     console.log(req.body); //expected a expense object
 
-    const updateExpense = await Expense.findByPk(req.body.id);
+    const updateExpense = await Expense.findByPk(req.params.id);
     updateExpense.expense_name = req.body.expense_name;
     updateExpense.expense_value = req.body.expense_value;
     updateExpense.save();
     res.status(201).json(updateExpense);
   } catch (error) {
     console.log(error);
+    next(error);
+  }
+});
+
+router.delete("/:id", async (req, res, next) => {
+  try {
+    const expenseToDelete = await Expense.findByPk(req.params.id);
+    await expenseToDelete.destroy();
+    res.status(200).send("Expense Delete Successfully");
+  } catch (error) {
+    console.log("error");
     next(error);
   }
 });
