@@ -78,6 +78,17 @@ router.put("/:id", bodyParser.json(), async (req, res, next) => {
   }
 });
 
+router.delete("/:id", async (req, res, next) => {
+  try {
+    const expenseToDelete = await Expense.findByPk(req.params.id);
+    await expenseToDelete.destroy();
+    res.status(200).send("Expense Delete Successfully");
+  } catch (error) {
+    console.log("error");
+    next(error);
+  }
+});
+
 router.post("/addExpense", authenticateUser, async (req, res, next) => {
   try {
     const { name, amount, budgetId } = req.body; // we get budgetId from req.body
