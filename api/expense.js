@@ -11,53 +11,58 @@ router.get("/getExpenses", authenticateUser, async (req, res, next) => {
   res.status(200).json(expenses);
 });
 
-router.post("/", bodyParser.json(), authenticateUser, async (req, res, next) => {
-  try {
-    console.log(req.body); // Array of expenses expected from the form
+router.post(
+  "/",
+  bodyParser.json(),
+  authenticateUser,
+  async (req, res, next) => {
+    try {
+      console.log(req.body); // Array of expenses expected from the form
 
-    const newExpensesData = req.body.expenses.map((expense) => ({
-      ...expense,
-      UserId: req.user.id,
-    }));
+      const newExpensesData = req.body.expenses.map((expense) => ({
+        ...expense,
+        UserId: req.user.id,
+      }));
 
-    // for (let i = 0; i < newExpensesData.length; i++) {
-    //   const expense = newExpensesData[i];
-    //   //if expense.id is defined then: find an updated
-    //   if (expense.id) {
-    //     const updateExpense = await Expense.findByPk(expense.id);
+      // for (let i = 0; i < newExpensesData.length; i++) {
+      //   const expense = newExpensesData[i];
+      //   //if expense.id is defined then: find an updated
+      //   if (expense.id) {
+      //     const updateExpense = await Expense.findByPk(expense.id);
 
-    //     updateExpense.expense_name = expense.expense_name;
-    //     updateExpense.expense_value = expense.expense_value;
+      //     updateExpense.expense_name = expense.expense_name;
+      //     updateExpense.expense_value = expense.expense_value;
 
-    //     updateExpense.save();
-    //   } else {
-    //     //if is is not in the db (dont have an id) then create
-    //     await Expense.create(expense);
-    //   }
-    // }
-    for (const expense of newExpensesData) {
-      // If expense.id is defined then update
-      if (expense.id) {
-        const updateExpense = await Expense.findByPk(expense.id);
+      //     updateExpense.save();
+      //   } else {
+      //     //if is is not in the db (dont have an id) then create
+      //     await Expense.create(expense);
+      //   }
+      // }
+      for (const expense of newExpensesData) {
+        // If expense.id is defined then update
+        if (expense.id) {
+          const updateExpense = await Expense.findByPk(expense.id);
 
-        updateExpense.expense_name = expense.expense_name;
-        updateExpense.expense_value = expense.expense_value;
+          updateExpense.expense_name = expense.expense_name;
+          updateExpense.expense_value = expense.expense_value;
 
-        await updateExpense.save();
-      } else {
-        // If it doesn't have an id, then create a new record
-        await Expense.create(expense);
+          await updateExpense.save();
+        } else {
+          // If it doesn't have an id, then create a new record
+          await Expense.create(expense);
+        }
       }
-    }
 
-    console.log("new Expenses with Id:\n", newExpensesData);
-    // const newExpenses = await Expense.bulkCreate(newExpensesData);
-    res.status(201).json(newExpensesData);
-  } catch (error) {
-    console.log(error);
-    next(error);
+      console.log("new Expenses with Id:\n", newExpensesData);
+      // const newExpenses = await Expense.bulkCreate(newExpensesData);
+      res.status(201).json(newExpensesData);
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
   }
-});
+);
 
 router.put("/:id", bodyParser.json(), async (req, res, next) => {
   try {
@@ -74,23 +79,23 @@ router.put("/:id", bodyParser.json(), async (req, res, next) => {
   }
 });
 
-router.post("/addExpense", authenticateUser, async(req, res, next) => {
+router.post("/addExpense", authenticateUser, async (req, res, next) => {
   try {
-    const { name, amount, budgetId } = req.body;  // we get budgetId from req.body
+    const { name, amount, budgetId } = req.body; // we get budgetId from req.body
 
     const userId = req.user.id;
 
-    const budget = await Budget.findByPk(budgetId);  // you find the budget using budgetId
+    const budget = await Budget.findByPk(budgetId); // you find the budget using budgetId
 
-    if(!budget) {
-      return res.status(404).send('Budget not found');
+    if (!budget) {
+      return res.status(404).send("Budget not found");
     }
 
     // then you create the expense
     const expense = await Expense.create({
       expense_name: name,
       expense_value: amount,
-      UserId: userId
+      UserId: userId,
     });
 
     // and associate the expense with the budget.
@@ -99,7 +104,6 @@ router.post("/addExpense", authenticateUser, async(req, res, next) => {
 
     // respond with the newly created expense
     res.json(expense);
-
   } catch (error) {
     // pass the error to your error handling middleware
     next(error);
