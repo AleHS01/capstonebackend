@@ -2,6 +2,7 @@ const router = require("express").Router();
 const { User, Expense, Budget } = require("../database/Models");
 const bodyParser = require("body-parser");
 const authenticateUser = require("../middleware/authenticateUser");
+const { use } = require("passport");
 
 router.get("/getExpenses", authenticateUser, async (req, res, next) => {
   //req.user stores  the entire user that has been authenticated inside of it
@@ -104,6 +105,31 @@ router.post("/addExpense", authenticateUser, async(req, res, next) => {
     next(error);
   }
 });
+
+router.get('/totalExpenses', authenticateUser, async (req,res,next)=> {
+  try {
+    const userid = req.user.id
+    const expenses = await Expense.findAll({where: 
+      {UserId: userid},
+    })
+    console.log(expenses)
+    res.send("Got it")
+
+    var total = 0.0
+    expenses.forEach(function(item) {
+      console.log(item.expense_value)
+      total = total + parseFloat(item.expense_value)
+    })
+    console.log("total", total)
+    res.status(200).send(total)
+    
+  } catch (error) {
+    console.log(error)
+  }
+})
+
+
+
 
 
 module.exports = router;
