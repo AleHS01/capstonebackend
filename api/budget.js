@@ -53,24 +53,11 @@ router.get("/budgetNames", authenticateUser, async (req, res, next) => {
   }
 });
 
-router.post("/budgetAmount", authenticateUser, async(req,res,next) => {
-    try {
-        const {id} = req.body
-        console.log(id)
-        const budget = await Budget.findByPk(id)
-        const budgetTotal = budget.amount
-        console.log(budgetTotal)
-        res.status(200).json({ amount: budgetTotal });
-    } catch (error) {
-        console.log(error)
-        next(error) 
-    }
-})
-
 router.delete("/:id", authenticateUser, async (req, res, next) => {
   try {
     const budget = await Budget.findByPk(req.params.id);
     await budget.destroy();
+    res.status(200).send("Budget Deleted it");
   } catch (error) {
     console.log(error);
     next(error);
