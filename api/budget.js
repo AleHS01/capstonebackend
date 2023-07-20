@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const User = require("../database/Models/user");
 const Budget = require("../database/Models/budget");
+const { Expense } = require("../database/Models");
 const authenticateUser = require("../middleware/authenticateUser");
 
 router.post("/addBudget", authenticateUser, async (req, res, next) => {
@@ -27,6 +28,9 @@ router.get("/budgetDetails", authenticateUser, async (req, res, next) => {
     const budgets = await Budget.findAll({
       where: {
         userId: userId,
+      },
+      include: {
+        model: Expense,
       },
     });
     console.log(budgets);
