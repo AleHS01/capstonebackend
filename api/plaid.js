@@ -2,10 +2,15 @@ const router = require("express").Router();
 require("dotenv").config();
 const plaid = require("plaid");
 const authenticateUser = require("../middleware/authenticateUser");
-const {User} = require("../database/Models");
+const { User } = require("../database/Models");
 
 // const User = require("../database/Models/user");
-const { Configuration, PlaidApi, PlaidEnvironments,TransactionsSyncRequest } = require("plaid");
+const {
+  Configuration,
+  PlaidApi,
+  PlaidEnvironments,
+  TransactionsSyncRequest,
+} = require("plaid");
 
 const configuration = new Configuration({
   basePath: PlaidEnvironments.sandbox,
@@ -79,52 +84,49 @@ router.post(
 );
 
 router.post("/accounts", authenticateUser, async (req, res, next) => {
-  const user = await User.findByPk(req.user.id)
-  const access_token = user.plaidAccessToken
-  console.log(access_token)
+  const user = await User.findByPk(req.user.id);
+  const access_token = user.plaidAccessToken;
+  console.log(access_token);
   try {
     const response = await client.accountsGet({
-      access_token: access_token
+      access_token: access_token,
     });
     const accounts = response.data.accounts;
     console.log(accounts);
-    res.json({ accounts});
+    res.json({ accounts });
   } catch (error) {
     console.log(error.message);
     next(error);
   }
 });
 
-router.post("/transactions",authenticateUser,async(req,res,next)=>{
+router.post("/transactions", authenticateUser, async (req, res, next) => {
   try {
-    let user=await User.findByPk(req.user.id);
-    let plaid_item_id=user.plaidItemId 
-    let access_token=user.plaidAccessToken
+    let user = await User.findByPk(req.user.id);
+    let plaid_item_id = user.plaidItemId;
+    let access_token = user.plaidAccessToken;
 
+    let hasMore = true;
+    let cursor = null;
+    let allTrans = [];
 
-
-    let hasMore=true;
-    let cursor=null;
-    let allTrans=[];
-
-    while (hasMore){
-      const request={
+    while (hasMore) {
+      const request = {
         access_token: access_token,
         cursor: cursor,
-        options: {include_personal_finance_category: true},
-      }
-      const response = await client.transactionsSync(request)
+        options: { include_personal_finance_category: true },
+      };
+      const response = await client.transactionsSync(request);
       const data = response.data;
-      allTrans=allTrans.concat(data.added)
-      hasMore=data.has_more;
-      cursor=data.next_cursor
-    };
-    res.json(allTrans)
+      allTrans = allTrans.concat(data.added);
+      hasMore = data.has_more;
+      cursor = data.next_cursor;
+    }
+    res.json(allTrans);
   } catch (error) {
-    console.log("Error in Transactions")
-    next(error)
+    console.log("Error in Transactions");
+    next(error);
   }
-}
-)
+});
 
 module.exports = router;
