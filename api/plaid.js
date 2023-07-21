@@ -92,7 +92,14 @@ router.post("/accounts", authenticateUser, async (req, res, next) => {
       access_token: access_token,
     });
     const accounts = response.data.accounts;
-    console.log(accounts);
+    console.log("accounts in plaid line 95:\n", accounts);
+    let sum = 0;
+    for (account of accounts) {
+      sum += account.balances.available;
+    }
+    user.balance = sum;
+    user.save();
+
     res.json({ accounts });
   } catch (error) {
     console.log(error.message);
