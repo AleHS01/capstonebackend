@@ -10,6 +10,19 @@ const User = db.define(
       allowNull: false,
       unique: true,
     },
+    first_name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    last_name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    balance: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: true,
+      defaultValue: 0,
+    },
     email: {
       type: DataTypes.STRING,
       allowNull: false,

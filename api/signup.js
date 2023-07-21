@@ -3,7 +3,7 @@ const { User } = require("../database/Models");
 const bycrypt = require("bcryptjs");
 
 router.post("/", async (req, res, next) => {
-  const { username, password, email } = req.body;
+  const { username, password, email, first_name, last_name } = req.body;
 
   try {
     const existingUser = await User.findOne({ where: { username } });
@@ -15,6 +15,8 @@ router.post("/", async (req, res, next) => {
         username: username,
         email: email,
         password: password,
+        first_name: first_name,
+        last_name: last_name,
       });
 
       res.send("User Created");

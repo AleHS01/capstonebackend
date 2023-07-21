@@ -47,6 +47,8 @@ module.exports = function (passport) {
           username: `${profile.name.givenName} ${profile.name.familyName}`,
           email: profile.emails[0].value,
           googleId: profile.id,
+          first_name: profile.name.givenName,
+          last_name: profile.name.familyName,
         };
 
         // console.log("google Profile:", profile);

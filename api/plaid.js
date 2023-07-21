@@ -2,7 +2,7 @@ const router = require("express").Router();
 require("dotenv").config();
 const plaid = require("plaid");
 const authenticateUser = require("../middleware/authenticateUser");
-const { User } = require("../database/Models");
+const { User, Transaction } = require("../database/Models");
 
 // const User = require("../database/Models/user");
 const {
@@ -122,7 +122,37 @@ router.post("/transactions", authenticateUser, async (req, res, next) => {
       hasMore = data.has_more;
       cursor = data.next_cursor;
     }
-    res.json(allTrans);
+    for (const transactionData of allTrans) {
+      const {
+        amount,
+        date,
+        merchant_name,
+        category,
+        name,
+        payment_channel,
+        personal_finance_category,
+        transaction_id,
+      } = transactionData;
+
+      await Transaction.findOrCreate({
+        where: { transaction_id },
+        defaults: {
+          amount,
+          date,
+          merchant_name,
+          category: category[0],
+          name,
+          payment_channe: payment_channel,
+          personal_finance_category: personal_finance_category.primary,
+          UserId: user.id,
+        },
+      });
+    }
+    const transactionsArray = await Transaction.findAll({
+      where: { UserId: user.id },
+    });
+
+    res.json(transactionsArray);
   } catch (error) {
     console.log("Error in Transactions");
     next(error);
