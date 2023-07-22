@@ -30,5 +30,12 @@ router.post("/create",authenticateUser,async(req,res,next)=>{
     }
 
 });
-
+router.get("/get_all_groups",authenticateUser,async(req,res,next)=>{
+    try {
+        const all_groups=await Group.findAll()
+        res.status(200).json(all_groups)
+    } catch (error) {
+        next(error)
+    }
+})
 module.exports= router;
