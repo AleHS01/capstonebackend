@@ -8,6 +8,11 @@ router.post("/create",authenticateUser,async(req,res,next)=>{
         const {name}=req.body;
 
         const user= await User.findByPk(userID)
+
+        if (user.GroupId) {
+            return res.status(409).json({ error: "User already has a group" });
+        }
+      
         
         const new_group=await Group.create({
             group_name:name
