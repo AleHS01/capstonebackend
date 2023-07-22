@@ -38,4 +38,19 @@ router.get("/get_all_groups",authenticateUser,async(req,res,next)=>{
         next(error)
     }
 })
+
+router.post("/add_member",authenticateUser,async (req,res,next)=>{
+    try {
+        const user_id=req.user.id
+        const {GroupId}=req.body
+        const user=await User.findByPk(user_id)
+        if (user.GroupId!==null){
+            return res.status(409).send("User Already has a group")
+        }
+        const updated_user=await user.update({GroupId});
+        res.status(200).send(updated_user);
+    } catch (error) {
+        next(error)
+    }
+})
 module.exports= router;
