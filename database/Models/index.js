@@ -3,6 +3,7 @@ const Expense = require("./expense");
 const Income = require("./income");
 const Budget = require("./budget");
 const Transaction = require("./transaction");
+const Group = require("./group");
 
 //Associations
 User.hasMany(Expense);
@@ -16,10 +17,16 @@ Income.belongsTo(User);
 Budget.hasMany(Expense);
 Expense.belongsTo(Budget);
 
+//Groups can have Many Users
+User.belongsTo(Group)
+
+
+
 module.exports = {
   User,
   Expense,
   Income,
   Budget,
   Transaction,
+  Group
 };
