@@ -19,6 +19,7 @@ Expense.belongsTo(Budget);
 
 //Groups can have Many Users
 User.belongsTo(Group)
+Group.hasMany(User)
 
 
 
