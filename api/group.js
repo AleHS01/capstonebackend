@@ -66,4 +66,25 @@ router.post("/remove_table",authenticateUser,async(req,res,next)=>{
     }
 })
 
+router.get("/user_hasGroup",authenticateUser,async(req,res,next)=>{
+    try {
+        res.status(200).send(!!((await User.findByPk(req.user.id)).GroupId))
+    } catch (error) {
+        next(error)
+    }
+})
+
+router.get("/all_members",authenticateUser,async (req,res,next)=>{
+    try {
+        const GroupId= req.user.GroupId
+        const users =await User.findAll({where:{
+            GroupId
+        }})
+        res.status(200).json(users)
+
+    } catch (error) {
+        next(error)
+    }
+})
+
 module.exports= router;
