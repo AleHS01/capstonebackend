@@ -53,4 +53,17 @@ router.post("/add_member",authenticateUser,async (req,res,next)=>{
         next(error)
     }
 })
+
+router.post("/remove_table",authenticateUser,async(req,res,next)=>{
+    try {
+        const user=await User.findByPk(req.user.id);
+        const table_id=user.GroupId;
+        await user.update({GroupId:null})
+        await Group.destroy({where:{id:table_id}});
+        res.status(200).send(`table ${table_id} deleted`)
+    } catch (error) {
+        next(error)
+    }
+})
+
 module.exports= router;
