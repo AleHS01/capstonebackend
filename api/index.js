@@ -10,6 +10,7 @@ module.exports = (passport) => {
   router.use("/income", require("./income"));
   router.use("/budget", require("./budget"));
   router.use("/transactions", require("./transaction"));
+  router.use("/group", require("./group"));
 
   router.use((req, res, next) => {
     const error = new Error("404 Not Found");

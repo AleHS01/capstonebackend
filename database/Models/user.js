@@ -3,7 +3,7 @@ const db = require("../db");
 const bcrypt = require("bcryptjs");
 
 const User = db.define(
-  "User",
+  "Users",
   {
     username: {
       type: DataTypes.STRING,
@@ -45,6 +45,14 @@ const User = db.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    // group_id:{
+    //   type:DataTypes.INTEGER,
+    //   allowNull: true,
+    //   references:{
+    //     model:"Group",
+    //     key:"group_id"
+    //   }
+    // }
   },
   {
     hooks: {
