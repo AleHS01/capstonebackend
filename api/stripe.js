@@ -3,7 +3,7 @@ const authenticateUser = require('../middleware/authenticateUser');
 
 const stripe = require('stripe')('sk_test_51NU5vjGCLtTMWEv9ay2ULAYs2XP0v51AzuNc63mihcNN0dBkA9EPdlpr0uxnNIvbDjjoNs2ByHVQIeq7oE1JcdFS005uom0nlt');
 const router = require("express").Router()
-const {User}= require("../database/Models")
+const {User,Group,Active_Committee}= require("../database/Models")
 
 router.post("/create_customer",authenticateUser,async (req,res,next)=>{
   try {
@@ -77,6 +77,47 @@ router.post("/create_checkout_session",authenticateUser,async(req,res,next)=>{
   }
 })
 
+router.post("/activate_committee",authenticateUser,async (req,res,next)=>{
+  const {GroupId}=req.user;
+  const group=await Group.findByPk(GroupId)
+  const group_name=group.group_name;
+  
+  //create a product here
+  const product = await stripe.products.create({
+    name:group_name,
+    default_price:group.amount
+  });
+
+  const today_date= new Date()
+  const end_date=new Date()
+
+  //count the user's in the group
+  const usersInGroup=await User.count({where:{
+    GroupId
+  }})
+  
+  const new_committee= await Active_Committee.create({
+    id:GroupId,
+    committee_name:group_name,
+    start_date:today_date,
+    end_date:end_date.setMonth(end_date.getMonth()+usersInGroup),
+    activated:true,
+    stripe_product_id:product.id
+  })
+  
+
+  res.status(200).json({product,new_committee})
+})
+
+router.post("/get_committee_product",authenticateUser,async (req,res,next)=>{
+  const user=await User.findByPk(req.user.id)
+  const committee= await Active_Committee.findByPk(req.userGroupId)
+  const product = await stripe.products.retrieve(
+    committee.stripe_product_id
+  );
+
+  res.status(200).json(product)
+})
 
 
 module.exports= router;

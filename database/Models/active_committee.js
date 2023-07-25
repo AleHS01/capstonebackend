@@ -21,6 +21,10 @@ const Active_Committee = db.define("Active_Committee",{
     end_date:{
         type:DataTypes.DATE,
         allowNull: true,
+    },
+    stripe_product_id:{
+        type:DataTypes.STRING,
+        allowNull:true
     }
 })
 
