@@ -8,12 +8,16 @@ const {User}= require("../database/Models")
 router.post("/create_customer",authenticateUser,async (req,res,next)=>{
   try {
     const user=await User.findByPk(req.user.id)
-
+    const {first_name,last_name,email}=user;
     if (user.Stripe_Customer_id)  {
       res.send("User already registered with Stripe")
+      return
     }
 
-    const customer = await stripe.customers.create();
+    const customer = await stripe.customers.create({
+      name:`${first_name} ${last_name}`,
+      email
+    });
     // add customer name here to update stripe information
     const updated_user=await user.update({Stripe_Customer_id:customer.id})
     res.status(200).json("Customer Added to Stripe")
