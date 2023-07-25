@@ -9,17 +9,19 @@ router.post("/create_customer",authenticateUser,async (req,res,next)=>{
   try {
     const user=await User.findByPk(req.user.id)
 
-    if (user.Stripe_Customer_id) return res.send("User already registered with Stripe")
+    if (user.Stripe_Customer_id)  {
+      res.send("User already registered with Stripe")
+    }
 
     const customer = await stripe.customers.create();
-    //add customer name here to update stripe information
-    await user.update({Stripe_Customer_id:customer.id})
-    res.send(200).send("Stripe Customer Created")
+    // add customer name here to update stripe information
+    const updated_user=await user.update({Stripe_Customer_id:customer.id})
+    res.status(200).json("Customer Added to Stripe")
   } catch (error) {
     next(error)
   }
 })
-/
+
 router.post("/setup_intent",authenticateUser,async(req,res,next)=>{
   try {
     //getting the user object

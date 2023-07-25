@@ -45,14 +45,10 @@ const User = db.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
-    // group_id:{
-    //   type:DataTypes.INTEGER,
-    //   allowNull: true,
-    //   references:{
-    //     model:"Group",
-    //     key:"group_id"
-    //   }
-    // }
+    Stripe_Customer_id:{
+      type:DataTypes.STRING,
+      allowNull: true,
+    }
   },
   {
     hooks: {
