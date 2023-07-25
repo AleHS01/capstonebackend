@@ -5,7 +5,7 @@ const authenticateUser = require("../middleware/authenticateUser")
 router.post("/create",authenticateUser,async(req,res,next)=>{
     try {
         const userID=req.user.id;
-        const {name}=req.body;
+        const {name,amount}=req.body;
 
         const user= await User.findByPk(userID)
 
@@ -15,7 +15,8 @@ router.post("/create",authenticateUser,async(req,res,next)=>{
       
         
         const new_group=await Group.create({
-            group_name:name
+            group_name:name,
+            amount
         });
 
         await user.update({
