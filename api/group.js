@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const {Group,User} = require("../database/Models");
+const {Group,User,Active_Committee} = require("../database/Models");
 const authenticateUser = require("../middleware/authenticateUser")
 
 router.post("/create",authenticateUser,async(req,res,next)=>{
@@ -86,6 +86,29 @@ router.get("/all_members",authenticateUser,async (req,res,next)=>{
     } catch (error) {
         next(error)
     }
+})
+
+router.post("/activate_group",authenticateUser,async (req,res,next)=>{
+    const {GroupId}=req.user;
+    const {group_name}=(await Group.findByPk(GroupId))
+    
+    const today_date= new Date()
+    const end_date=new Date()
+
+    //count the user's in the group
+    const usersInGroup=await User.count({where:{
+        GroupId
+    }})
+
+    const new_committee= await Active_Committee.create({
+        id:GroupId,
+        committee_name:group_name,
+        start_date:today_date,
+        end_date:end_date.setMonth(end_date.getMonth()+usersInGroup),
+        activated:true,
+    })
+
+    res.status(200).json(new_committee)
 })
 
 module.exports= router;
