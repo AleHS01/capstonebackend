@@ -4,15 +4,14 @@ const bodyParser = require("body-parser");
 const authenticateUser = require("../middleware/authenticateUser");
 const { use } = require("passport");
 
-router.get("/getExpenses", authenticateUser, async (req, res, next) => {
+router.post("/getExpenses", authenticateUser, async (req, res, next) => {
   //req.user stores  the entire user that has been authenticated inside of it
   try {
     const expenses = await Expense.findAll({ where: { UserId: req.user.id } });
     res.status(200).json(expenses);
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
-
 });
 
 router.post(
@@ -109,30 +108,27 @@ router.post("/addExpense", authenticateUser, async (req, res, next) => {
   }
 });
 
-router.get('/totalExpenses/:budgetId', authenticateUser, async (req,res,next)=> {
-  const budgetId = req.params.budgetId
-  console.log(budgetId)
-  try {
-    const expenses = await Expense.findAll({where: 
-      {BudgetId: budgetId},
-    })
-    console.log(expenses)
+router.get(
+  "/totalExpenses/:budgetId",
+  authenticateUser,
+  async (req, res, next) => {
+    const budgetId = req.params.budgetId;
+    console.log(budgetId);
+    try {
+      const expenses = await Expense.findAll({ where: { BudgetId: budgetId } });
+      console.log(expenses);
 
-    var total = 0.0
-    expenses.forEach(function(item) {
-      console.log(item.expense_value)
-      total = total + parseFloat(item.expense_value)
-    })
-    console.log("total", total)
-    res.status(200).json(total)
-    
-  } catch (error) {
-    console.log(error)
+      var total = 0.0;
+      expenses.forEach(function (item) {
+        console.log(item.expense_value);
+        total = total + parseFloat(item.expense_value);
+      });
+      console.log("total", total);
+      res.status(200).json(total);
+    } catch (error) {
+      console.log(error);
+    }
   }
-})
-
-
-
-
+);
 
 module.exports = router;
