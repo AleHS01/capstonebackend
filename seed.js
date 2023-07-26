@@ -1,9 +1,10 @@
 const User = require("./database/Models/user");
 
 const seedUser = [
-  { username: "hamza", email: "hamzakhaliq@gmail.com", password: "hikhal56" },
-  { username: "Ale", email: "Ale@gmail.com", password: "ale56" },
-  { username: "Ghulam", email: "ghulmanabia75@gmail.com", password: "Home6924" },
+  { username: "shoaib001", first_name:"Shoaib",last_name:"Ashfaq", email: "shoaibashfaq@gmail.com", password: "shoaib" },
+  { username: "hamza1", first_name:"Hamza",last_name:"Kahliq", email: "hikhail@yahoo.com", password: "hamza" },
+  { username: "ghulam69", first_name:"Ghulam",last_name:"Ahmed", email: "hafiz@gmail.com", password: "ghulam" },
+ 
 ];
 
 const seed = async () => {

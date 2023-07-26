@@ -4,6 +4,7 @@ const Income = require("./income");
 const Budget = require("./budget");
 const Transaction = require("./transaction");
 const Group = require("./group");
+const Active_Committee=require("./active_committee")
 
 //Associations
 User.hasMany(Expense);
@@ -28,5 +29,6 @@ module.exports = {
   Income,
   Budget,
   Transaction,
-  Group
+  Group,
+  Active_Committee
 };
