@@ -4,7 +4,7 @@ const bycrypt = require("bcryptjs");
 
 router.post("/", async (req, res, next) => {
   const { username, password, email, first_name, last_name } = req.body;
-
+  console.log("Sign Up triggerred line 7");
   try {
     const existingUser = await User.findOne({ where: { username } });
 
