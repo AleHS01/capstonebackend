@@ -16,12 +16,12 @@ const pg = require("pg");
 //   logging: false,
 //   dialectModule: pg,
 // });
-const db = new Sequelize('postgres://localhost:5432/capstonedatabase')
+//const db = new Sequelize('postgres://localhost:5432/capstonedatabase')
 
-// const db = new Sequelize("postgres://postgres:Home6924@localhost:5432/financemate_db", {
-//   logging: false,
-//   dialectModule: pg,
-// });
+const db = new Sequelize("postgres://postgres:Home6924@localhost:5432/financemate_db", {
+  logging: false,
+  dialectModule: pg,
+});
 
 //Test Conection
 db.authenticate()
