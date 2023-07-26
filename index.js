@@ -34,7 +34,8 @@ const corsOptions = {
   credentials: true,
 };
 
-app.use(cors(corsOptions));
+app.use(cors(corsOptions)); // Use the custom CORS middleware
+
 app.use(
   session({
     secret: "secret",
