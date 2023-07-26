@@ -60,57 +60,77 @@ router.post("/setup_intent",authenticateUser,async(req,res,next)=>{
   }
 })
 
-router.post("/create_checkout_session",authenticateUser,async(req,res,next)=>{
+router.post("/create_checkout_session", authenticateUser, async (req, res, next) => {
+  const user = await User.findByPk(req.user.id);
+  const committeeId = req.user.GroupId;
+  const committee = await Active_Committee.findByPk(committeeId);
+
   try {
-    const user=await User.findByPk(req.user.id)
     const session = await stripe.checkout.sessions.create({
-      success_url: `http://localhost:3000/user`,
+      success_url: 'http://localhost:3000/success', // Redirect URL after successful payment
+      cancel_url: 'http://localhost:3000/cancel', // Redirect URL after payment is canceled
+      payment_method_types: ['card'],
       line_items: [
-        {price: 'price_H5ggYwtDq4fbrJ', quantity: 1},
+        {
+          price: committee.stripe_product_id, // Use the Stripe product ID saved in Active_Committee
+          quantity: 1,
+        },
       ],
-      mode: 'setup',
-      customer:user.Stripe_Customer_id
+      mode: 'payment',
+      customer: user.Stripe_Customer_id,
     });
-    res.status(303).send(session.url)
-    
+
+    res.status(200).json({ sessionId: session.id });
   } catch (error) {
-    res.send(error)
-    console.log(error)
-    next(error)
+    next(error);
   }
-})
+});
 
-router.post("/activate_committee",authenticateUser,async (req,res,next)=>{
-  const {GroupId}=req.user;
-  const group=await Group.findByPk(GroupId)
-  const group_name=group.group_name;
-  
-  //create a product here
-  const product = await stripe.products.create({
-    name:group_name,
-    default_price:group.amount
-  });
 
-  const today_date= new Date()
-  const end_date=new Date()
+router.post("/activate_committee", authenticateUser, async (req, res, next) => {
+  const { GroupId } = req.user;
+  const group = await Group.findByPk(GroupId);
+  const group_name = group.group_name;
+  // Count the users in the group
+  const usersInGroup = await User.count({ where: { GroupId } });
 
-  //count the user's in the group
-  const usersInGroup=await User.count({where:{
-    GroupId
-  }})
-  
-  const new_committee= await Active_Committee.create({
-    id:GroupId,
-    committee_name:group_name,
-    start_date:today_date,
-    end_date:end_date.setMonth(end_date.getMonth()+usersInGroup),
-    activated:true,
-    stripe_product_id:product.id
-  })
-  
+  try {
+    // Create a product with the default price from the group
+    const product = await stripe.products.create({
+      name: group_name,
 
-  res.status(200).json({product,new_committee})
-})
+    });
+
+    const price = await stripe.prices.create({
+      unit_amount: Math.floor(group.amount*100/usersInGroup), // The price in the smallest currency unit (e.g., cents)
+      currency: "usd",
+      recurring: {
+        interval: 'month', // Set the billing interval to 'month' for monthly subscription
+        interval_count: 1, // Set the number of intervals to 1 for monthly subscription
+      },
+      product: product.id,
+    });
+
+
+    const today_date = new Date();
+    const end_date = new Date();
+
+
+    const new_committee = await Active_Committee.create({
+      id: GroupId,
+      committee_name: group_name,
+      start_date: today_date,
+      end_date: end_date.setMonth(end_date.getMonth() + usersInGroup),
+      activated: true,
+      stripe_product_id: product.id, // Save the product ID in the Active_Committee table
+    });
+
+    res.status(200).json({ product, new_committee });
+  } catch (error) {
+    next(error);
+  }
+});
+
 
 router.post("/get_committee_product",authenticateUser,async (req,res,next)=>{
   const user=await User.findByPk(req.user.id)
@@ -121,6 +141,8 @@ router.post("/get_committee_product",authenticateUser,async (req,res,next)=>{
 
   res.status(200).json(product)
 })
+
+
 
 
 module.exports= router;
