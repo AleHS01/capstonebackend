@@ -45,10 +45,10 @@ const User = db.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
-    Stripe_Customer_id:{
-      type:DataTypes.STRING,
+    Stripe_Customer_id: {
+      type: DataTypes.STRING,
       allowNull: true,
-    }
+    },
   },
   {
     hooks: {
@@ -66,13 +66,12 @@ const User = db.define(
           }
         }
       },
-    },
-
-    beforeUpdate: async (user) => {
-      if (user.password && user.changed("password")) {
-        const salt = await bcrypt.genSalt(10); // generating salt using bcrypt
-        user.password = await bcrypt.hash(user.password, salt);
-      }
+      beforeUpdate: async (user) => {
+        if (user.password && user.changed("password")) {
+          const salt = await bcrypt.genSalt(10); // generating salt using bcrypt
+          user.password = await bcrypt.hash(user.password, salt);
+        }
+      },
     },
   }
 );
