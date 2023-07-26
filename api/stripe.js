@@ -1,4 +1,4 @@
-const { authenticate } = require('passport');
+
 const authenticateUser = require('../middleware/authenticateUser');
 
 const stripe = require('stripe')('sk_test_51NU5vjGCLtTMWEv9ay2ULAYs2XP0v51AzuNc63mihcNN0dBkA9EPdlpr0uxnNIvbDjjoNs2ByHVQIeq7oE1JcdFS005uom0nlt');
@@ -18,10 +18,13 @@ router.post("/create_customer",authenticateUser,async (req,res,next)=>{
       name:`${first_name} ${last_name}`,
       email
     });
+    console.log(customer);
     // add customer name here to update stripe information
     const updated_user=await user.update({Stripe_Customer_id:customer.id})
+    await user.save()
     res.status(200).json("Customer Added to Stripe")
   } catch (error) {
+    console.log(error)
     next(error)
   }
 })

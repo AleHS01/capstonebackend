@@ -75,9 +75,9 @@ router.get("/user_hasGroup",authenticateUser,async(req,res,next)=>{
     }
 })
 
-router.get("/all_members",authenticateUser,async (req,res,next)=>{
+router.post("/all_members",authenticateUser,async (req,res,next)=>{
     try {
-        const GroupId= req.user.GroupId
+        const {GroupId}= req.body
         const users =await User.findAll({where:{
             GroupId
         }})
