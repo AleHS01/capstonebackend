@@ -8,4 +8,4 @@ const authenticateUser = (req, res, next) => {
   // res.status(401).send("Unauthorized");
 };
 
-module.exports = authenticateUser;
+module.exports = authenticateUser

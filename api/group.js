@@ -16,7 +16,7 @@ router.post("/create",authenticateUser,async(req,res,next)=>{
         
         const new_group=await Group.create({
             group_name:name,
-            amount
+            amount: amount
         });
 
         await user.update({
