@@ -36,13 +36,25 @@ const corsOptions = {
 
 app.use(cors(corsOptions)); // Use the custom CORS middleware
 
+// app.use(
+//   session({
+//     secret: "secret",
+//     store: sessionStore,
+//     resave: true,
+//     saveUninitialized: true,
+//     cookie: { maxAge: 8 * 60 * 60 * 1000 },
+//   })
+// );
+app.use(cookieParser());
 app.use(
-  session({
+  cookieSession({
+    name: "session",
     secret: "secret",
-    store: sessionStore,
-    resave: true,
-    saveUninitialized: true,
-    cookie: { maxAge: 8 * 60 * 60 * 1000 },
+    sameSite: "none",
+    secure: true,
+    maxAge: 1000 * 60 * 60 * 24,
+    path: "/",
+    httpOnly: true,
   })
 );
 
@@ -50,7 +62,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 require("./config/passportConfig")(passport); //to use same instance of passport in the entire server
 
-app.use(cookieParser("secret"));
+// app.use(cookieParser("secret"));
 
 //------------------------Middleware Done----------------------
 
