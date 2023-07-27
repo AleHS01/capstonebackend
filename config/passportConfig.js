@@ -79,7 +79,7 @@ module.exports = function (passport) {
   // -------------End of Google Auth--------------
 
   passport.serializeUser((user, cb) => {
-    consoel.log("Serialize user id:", user.id);
+    console.log("Serialize user id:", user.id);
     cb(null, user.id);
   });
 
