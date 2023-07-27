@@ -58,8 +58,9 @@ app.use(
   cookieSession({
     name: "session",
     secret: "secret",
-    sameSite: "none",
-    secure: true,
+    //for non HTTPS connection: if its a HTTPS (deploy) then put back
+    // sameSite: "none",
+    // secure: true,
     maxAge: 1000 * 60 * 60 * 24,
     path: "/",
     httpOnly: true,

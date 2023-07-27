@@ -5,7 +5,7 @@ const authenticateUser = (req, res, next) => {
     // If the user is authenticated, allow them to proceed
     return next();
   }
-  // res.status(401).send("Unauthorized");
+  res.status(401).send("Unauthorized");
 };
 
 module.exports = authenticateUser;
