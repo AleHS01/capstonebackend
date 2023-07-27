@@ -38,6 +38,7 @@ app.use(express.urlencoded({ extended: true }));
 // };
 
 // app.use(cors(corsOptions)); // Use the custom CORS middleware
+app.enable("trust proxy");
 
 app.use(
   cors({
