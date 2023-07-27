@@ -1,9 +1,9 @@
+require("dotenv").config();
 const { defaults } = require("pg");
 const { User } = require("../database/Models");
 const bcrypt = require("bcryptjs");
 const LocalStrategy = require("passport-local").Strategy;
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
-require("dotenv").config();
 
 module.exports = function (passport) {
   passport.use(
@@ -43,7 +43,7 @@ module.exports = function (passport) {
       {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: "http://localhost:8080/api/login/google_callback",
+        callbackURL: `${process.env.BACKEND_URL}/api/login/google_callback`,
         // passReqToCallback: true,
       },
       async (accessToken, refreshToken, profile, done) => {
