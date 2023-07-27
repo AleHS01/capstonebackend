@@ -90,17 +90,32 @@ app.use(
 //   next();
 // });
 
-passport.serializeUser((user, cb) => {
-  cb(null, user.id);
+// passport.serializeUser((user, cb) => {
+//   cb(null, user.id);
+// });
+
+// passport.deserializeUser(async (id, cb) => {
+//   console.log("User id in deserializeUser: ", id);
+//   try {
+//     const user = await User.findByPk(id);
+//     cb(null, user);
+//   } catch (error) {
+//     cb(error, null);
+//   }
+// });
+
+passport.serializeUser((user, done) => {
+  console.log("serialize User is running");
+  done(null, user.id);
 });
 
-passport.deserializeUser(async (id, cb) => {
-  console.log("User id in deserializeUser: ", id);
+passport.deserializeUser(async (id, done) => {
+  console.log("Deserialize is Running");
   try {
     const user = await User.findByPk(id);
-    cb(null, user);
+    done(null, user);
   } catch (error) {
-    cb(error, null);
+    done(error, null);
   }
 });
 
