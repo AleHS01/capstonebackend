@@ -1,6 +1,5 @@
 const router = require("express").Router();
 const { User, Expense, Budget } = require("../database/Models");
-const bodyParser = require("body-parser");
 const authenticateUser = require("../middleware/authenticateUser");
 const { use } = require("passport");
 
@@ -14,44 +13,39 @@ router.post("/getExpenses", authenticateUser, async (req, res, next) => {
   }
 });
 
-router.post(
-  "/",
-  bodyParser.json(),
-  authenticateUser,
-  async (req, res, next) => {
-    try {
-      console.log(req.body); // Array of expenses expected from the form
+router.post("/", authenticateUser, async (req, res, next) => {
+  try {
+    console.log(req.body); // Array of expenses expected from the form
 
-      const newExpensesData = req.body.expenses.map((expense) => ({
-        ...expense,
-        UserId: req.user.id,
-      }));
-      for (const expense of newExpensesData) {
-        // If expense.id is defined then update
-        if (expense.id) {
-          const updateExpense = await Expense.findByPk(expense.id);
+    const newExpensesData = req.body.expenses.map((expense) => ({
+      ...expense,
+      UserId: req.user.id,
+    }));
+    for (const expense of newExpensesData) {
+      // If expense.id is defined then update
+      if (expense.id) {
+        const updateExpense = await Expense.findByPk(expense.id);
 
-          updateExpense.expense_name = expense.expense_name;
-          updateExpense.expense_value = expense.expense_value;
+        updateExpense.expense_name = expense.expense_name;
+        updateExpense.expense_value = expense.expense_value;
 
-          await updateExpense.save();
-        } else {
-          // If it doesn't have an id, then create a new record
-          await Expense.create(expense);
-        }
+        await updateExpense.save();
+      } else {
+        // If it doesn't have an id, then create a new record
+        await Expense.create(expense);
       }
-
-      console.log("new Expenses with Id:\n", newExpensesData);
-      // const newExpenses = await Expense.bulkCreate(newExpensesData);
-      res.status(201).json(newExpensesData);
-    } catch (error) {
-      console.log(error);
-      next(error);
     }
-  }
-);
 
-router.put("/:id", bodyParser.json(), async (req, res, next) => {
+    console.log("new Expenses with Id:\n", newExpensesData);
+    // const newExpenses = await Expense.bulkCreate(newExpensesData);
+    res.status(201).json(newExpensesData);
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
+
+router.put("/:id", async (req, res, next) => {
   try {
     console.log(req.body); //expected a expense object
 

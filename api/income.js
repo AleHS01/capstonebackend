@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const { User, Income } = require("../database/Models");
-const bodyParser = require("body-parser");
+// const bodyParser = require("body-parser");
 
 router.post("/get", async (req, res, next) => {
   //req.user stores  the entire user that has been authenticated inside of it
@@ -9,7 +9,7 @@ router.post("/get", async (req, res, next) => {
   res.status(200).json(incomes);
 });
 
-router.post("/", bodyParser.json(), async (req, res, next) => {
+router.post("/", async (req, res, next) => {
   try {
     console.log(req.body); // Array of incomes expected from the form
 

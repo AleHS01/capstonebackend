@@ -1,14 +1,15 @@
 const express = require("express");
 const cors = require("cors");
 const passport = require("passport");
-// const passportLocalStrategy = require("passport-local").Strategy;
-const cookieParser = require("cookie-parser");
-// const cookieSession = require("cookie-session");
-// const bycrypt = require("bcryptjs");
 const session = require("express-session");
-const bodyParser = require("body-parser");
 const db = require("./database/db");
 const SequelizeStore = require("connect-session-sequelize")(session.Store);
+import { User } from "./database/Models";
+// const passportLocalStrategy = require("passport-local").Strategy;
+// const cookieParser = require("cookie-parser");
+// const cookieSession = require("cookie-session");
+// const bycrypt = require("bcryptjs");
+// const bodyParser = require("body-parser");
 
 const app = express();
 
@@ -17,8 +18,8 @@ const sessionStore = new SequelizeStore({ db });
 //--------------------------Imports Done-----------
 
 // MiddleWare
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 // const corsOptions = {
 
 //   origin: function (origin, callback) {
@@ -46,13 +47,13 @@ app.use(
   })
 );
 
-app.use(cookieParser("secret"));
+// app.use(cookieParser("secret"));
 
 app.use(
   session({
     secret: "secret",
     store: sessionStore,
-    resave: true,
+    resave: false,
     saveUninitialized: true,
     cookie: {
       maxAge: 1000 * 60 * 60 * 24,
