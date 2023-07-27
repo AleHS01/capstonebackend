@@ -48,6 +48,10 @@ const User = db.define(
     Stripe_Customer_id:{
       type:DataTypes.STRING,
       allowNull: true,
+    },
+    hasValidPayment:{
+      type:DataTypes.BOOLEAN,
+      allowNull: true,
     }
   },
   {

@@ -160,8 +160,56 @@ router.post("/get_committee_product",authenticateUser,async (req,res,next)=>{
   res.status(200).json(product)
 })
 
+router.post("/has_valid_payment",authenticateUser,async(req,res,next)=>{
+  try {
+    const customer=await stripe.customer.retrieve(req.user.Stripe_Customer_id);
+    const user=await User.findByPk(req.user.id)
+    await user.update({hasValidPayment:true})
+    res.status(200).send(!!(customer.default_source))
+  } catch (error) {
+    console.log(error)
+    next(error)
+  }
+})
+
+router.post("/is_Committee_Ready",authenticateUser,async(req,res,next)=>{
+  try {
+    // get all users from the group and see if they ALL have a valid payment method
+    const committee_users=await User.findAll({where:{
+      GroupId:req.user.GroupId
+    }})
+
+    for (const user of committee_users) {
+      // Getting the status of an attached payment method directly from stripe
+      const customer = await stripe.customers.retrieve(user.Stripe_Customer_id,{expand: ['sources']},);
+      console.log("DEFAULT_SOURCE",customer.sources.data.length)
+      if (customer.sources.data.length==0) {
+        res.send(false);
+        return;
+      }
+    }
 
 
+    res.send(true)
+  } catch (error) {
+    console.log(error)
+    next(error)
+  }
+})
+
+router.post("/testing",authenticateUser,async(req,res,next)=>{
+  try {
+    // //used to get all setupIntents
+    // const setupIntents = await stripe.setupIntents.list({
+    //   limit: 3,
+    // });
+    
+    res.json(setupIntents)
+  } catch (error) {
+    console.log(error)
+    next(error)
+  }
+})
 
 module.exports= router;
 
