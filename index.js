@@ -44,28 +44,34 @@ app.use(
   })
 );
 
-// app.use(
-//   session({
-//     secret: "secret",
-//     store: sessionStore,
-//     resave: true,
-//     saveUninitialized: true,
-//     cookie: { maxAge: 8 * 60 * 60 * 1000 },
-//   })
-// );
-app.use(cookieParser());
+app.use(cookieParser("secret"));
+
 app.use(
-  cookieSession({
-    name: "session",
+  session({
     secret: "secret",
-    //for non HTTPS connection: if its a HTTPS (deploy) then put back
-    // sameSite: "none",
-    // secure: true,
-    maxAge: 1000 * 60 * 60 * 24,
-    path: "/",
-    httpOnly: true,
+    store: sessionStore,
+    resave: true,
+    saveUninitialized: true,
+    cookie: {
+      maxAge: 8 * 60 * 60 * 1000,
+      httpOnly: true,
+      // sameSite: "none", ONLY USE WHEN DEPLOY
+      // secure: true,
+    },
   })
 );
+// app.use(
+//   cookieSession({
+//     name: "session",
+//     secret: "secret",
+//     //for non HTTPS connection: if its a HTTPS (deploy) then put back
+//     // sameSite: "none",
+//     // secure: true,
+//     maxAge: 1000 * 60 * 60 * 24,
+//     path: "/",
+//     httpOnly: true,
+//   })
+// );
 app.use(function (request, response, next) {
   if (request.session && !request.session.regenerate) {
     request.session.regenerate = (cb) => {
