@@ -5,11 +5,12 @@ const session = require("express-session");
 const db = require("./database/db");
 const SequelizeStore = require("connect-session-sequelize")(session.Store);
 const { User } = require("./database/Models");
+const serverless = require("serverless-http");
 // const passportLocalStrategy = require("passport-local").Strategy;
 const cookieParser = require("cookie-parser");
 // const cookieSession = require("cookie-session");
 // const bycrypt = require("bcryptjs");
-// const bodyParser = require("body-parser");
+const bodyParser = require("body-parser");
 
 const app = express();
 
@@ -18,8 +19,8 @@ const sessionStore = new SequelizeStore({ db });
 //--------------------------Imports Done-----------
 
 // MiddleWare
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 // const corsOptions = {
 
 //   origin: function (origin, callback) {
@@ -145,3 +146,5 @@ async function main() {
 }
 
 main();
+
+module.exports.handler = serverless(app);
