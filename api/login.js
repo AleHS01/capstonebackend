@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { User, Expense } = require("../database/Models");
 const authenticateUser = require("../middleware/authenticateUser");
-
+require("dotenv").config();
 module.exports = (passport) => {
   // router.post("/", (req, res, next) => {
   //   passport.authenticate("local", (error, user, info) => {
