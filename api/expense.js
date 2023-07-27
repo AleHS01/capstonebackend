@@ -3,10 +3,11 @@ const { User, Expense, Budget } = require("../database/Models");
 const authenticateUser = require("../middleware/authenticateUser");
 const { use } = require("passport");
 
-router.post("/getExpenses", authenticateUser, async (req, res, next) => {
+router.post("/getExpenses", async (req, res, next) => {
   //req.user stores  the entire user that has been authenticated inside of it
   try {
-    const expenses = await Expense.findAll({ where: { UserId: req.user.id } });
+    const { UserId } = req.body;
+    const expenses = await Expense.findAll({ where: { UserId: UserId } });
     res.status(200).json(expenses);
   } catch (error) {
     console.log(error);
