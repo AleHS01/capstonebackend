@@ -12,22 +12,26 @@ module.exports = function (passport) {
         const user = await User.findOne({ where: { username } });
 
         if (!user) {
-          return done(null, false);
+          return done(null, false, { message: "Incorrect Username" });
         }
+        if (!bcrypt.compare(password, user.password)) {
+          return done(null, false, { message: "Incorrect Password" });
+        }
+        // await bcrypt.compare(password, user.password, (error, result) => {
+        //   if (error) {
+        //     return done(error);
+        //   }
 
-        bcrypt.compare(password, user.password, (error, result) => {
-          if (error) {
-            return done(null, error);
-          }
+        //   if (result === true) {
+        //     return done(null, user);
+        //   } else {
+        //     return done(null, false, { message: "Incorrect Password" });
+        //   }
+        // });
 
-          if (result === true) {
-            return done(null, user);
-          } else {
-            return done(null, false);
-          }
-        });
+        return done(null, user);
       } catch (error) {
-        return done(null, error);
+        return done(error);
       }
     })
   );
@@ -40,28 +44,34 @@ module.exports = function (passport) {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
         callbackURL: "http://localhost:8080/api/login/google_callback",
-        passReqToCallback: true,
+        // passReqToCallback: true,
       },
-      async (req, accessToken, refreshToken, profile, cb) => {
-        const defaultUser = {
-          username: `${profile.name.givenName} ${profile.name.familyName}`,
-          email: profile.emails[0].value,
-          googleId: profile.id,
-          first_name: profile.name.givenName,
-          last_name: profile.name.familyName,
-        };
+      async (accessToken, refreshToken, profile, done) => {
+        try {
+          const defaultUser = {
+            username: `${profile.name.givenName} ${profile.name.familyName}`,
+            email: profile.emails[0].value,
+            googleId: profile.id,
+            first_name: profile.name.givenName,
+            last_name: profile.name.familyName,
+          };
 
-        // console.log("google Profile:", profile);
-        const user = await User.findOrCreate({
-          where: { googleId: profile.id },
-          defaults: defaultUser,
-        }).catch((err) => {
-          console.log(err);
-          cb(err, null);
-        });
-        if (user && user[0]) {
-          return cb(null, user && user[0]);
+          // console.log("google Profile:", profile);
+          const [user] = await User.findOrCreate({
+            where: { googleId: defaultUser.googleId },
+            defaults: defaultUser,
+          });
+          done(null, user);
+        } catch (error) {
+          done(error);
         }
+        // ).catch((err) => {
+        //   console.log(err);
+        //   done(err, null);
+        // });
+        // if (user && user[0]) {
+        //   return done(null, user && user[0]);
+        // }
       }
     )
   );

@@ -22,31 +22,39 @@ module.exports = (passport) => {
   //     });
   //   })(req, res, next);
   // });
-  router.post("/", (req, res, next) => {
-    passport.authenticate("local", (error, user, info) => {
-      if (error) {
-        return next(error);
-      }
-      if (!user) {
-        return res.send("No User Exists");
-      }
-      req.logIn(user, (error) => {
-        if (error) {
-          return next(error);
-        }
-        console.log("req.user inside req.logIn:", req.user);
-        User.findByPk(req.user.id, { include: Expense })
-          .then((user) => {
-            res.status(200).json(user);
-            console.log("Just Logged In User", user);
-          })
-          .catch((error) => {
-            console.log(error);
-            next(error);
-          });
-      });
-      console.log("------------req.user in login--------:\n", req.user);
-    })(req, res, next);
+  // router.post("/", (req, res, next) => {
+  //   // passport.authenticate("local", (error, user, info) => {
+  //     passport.authenticate()
+  //     if (error) {
+  //       return next(error);
+  //     }
+  //     if (!user) {
+  //       return res.send("No User Exists");
+  //     }
+  //     // req.logIn(user, (error) => {
+  //     //   if (error) {
+  //     //     return next(error);
+  //     //   }
+  //     //   // console.log("req.user inside req.logIn:", req.user);
+  //     //   User.findByPk(req.user.id, { include: Expense })
+  //     //     .then((user) => {
+  //     //       res.status(200).json(user);
+  //     //       // console.log("Just Logged In User", user);
+  //     //     })
+  //     //     .catch((error) => {
+  //     //       console.log(error);
+  //     //       next(error);
+  //     //     });
+  //     // });
+  //     console.log("------------req.user in login--------:\n", req.user);
+  //   })((req, res, next)=>{
+
+  //   });
+  // });
+
+  router.post("/", passport.authenticate("local"), (req, res, next) => {
+    console.log("Login req.user\n", req.user);
+    res.json(req.user);
   });
 
   router.get(
