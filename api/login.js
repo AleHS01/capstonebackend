@@ -22,53 +22,53 @@ module.exports = (passport) => {
   //     });
   //   })(req, res, next);
   // });
-  // router.post("/", (req, res, next) => {
-  //   passport.authenticate("local", (error, user, info) => {
-  //     if (error) {
-  //       return next(error);
-  //     }
-  //     if (!user) {
-  //       return res.send("No User Exists");
-  //     }
-  //     req.logIn(user, (error) => {
-  //       if (error) {
-  //         return next(error);
-  //       }
-  //       console.log("req.user inside req.logIn:", req.user);
-  //       User.findByPk(req.user.id, { include: Expense })
-  //         .then((user) => {
-  //           res.status(200).json(user);
-  //           console.log("Just Logged In User", user);
-  //         })
-  //         .catch((error) => {
-  //           console.log(error);
-  //           next(error);
-  //         });
-  //     });
-  //     console.log("------------req.user in login--------:\n", req.user);
-  //   })(req, res, next);
-  // });
+  router.post("/", (req, res, next) => {
+    passport.authenticate("local", (error, user, info) => {
+      if (error) {
+        return next(error);
+      }
+      if (!user) {
+        return res.send("No User Exists");
+      }
+      req.logIn(user, (error) => {
+        if (error) {
+          return next(error);
+        }
+        console.log("req.user inside req.logIn:", req.user);
+        User.findByPk(req.user.id, { include: Expense })
+          .then((user) => {
+            res.status(200).json(user);
+            console.log("Just Logged In User", user);
+          })
+          .catch((error) => {
+            console.log(error);
+            next(error);
+          });
+      });
+      console.log("------------req.user in login--------:\n", req.user);
+    })(req, res, next);
+  });
 
-  router.post(
-    "/",
-    passport.authenticate("local", {
-      failureRedirect: `${process.env.FRONTEND_URL}/login/`,
-      failureMessage: "Cannot login to Google, please try again later!",
-      successRedirect: `${process.env.FRONTEND_URL}/login/success`,
-    }),
-    function (req, res, next) {
-      console.log("req.user in login - local:\n", req.user);
-      User.findByPk(req.user.id, { include: Expense })
-        .then((user) => {
-          res.status(200).json(user);
-          console.log("Just Logged In User", user);
-        })
-        .catch((error) => {
-          console.log(error);
-          next(error);
-        });
-    }
-  );
+  // router.post(
+  //   "/",
+  //   passport.authenticate("local", {
+  //     failureRedirect: `${process.env.FRONTEND_URL}/login/`,
+  //     failureMessage: "Cannot login to Google, please try again later!",
+  //     successRedirect: `${process.env.FRONTEND_URL}/login/success`,
+  //   }),
+  //   function (req, res, next) {
+  //     console.log("req.user in login - local:\n", req.user);
+  //     User.findByPk(req.user.id, { include: Expense })
+  //       .then((user) => {
+  //         res.status(200).json(user);
+  //         console.log("Just Logged In User", user);
+  //       })
+  //       .catch((error) => {
+  //         console.log(error);
+  //         next(error);
+  //       });
+  //   }
+  // );
 
   router.get(
     "/google",
