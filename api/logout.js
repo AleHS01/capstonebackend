@@ -41,6 +41,7 @@ module.exports = (passport) => {
           console.log(err);
           res.status(500).send("Error occurred during logout");
         } else {
+          res.clearCookie("connect.sid");
           res.send("Logout successful");
         }
       });
