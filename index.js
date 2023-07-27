@@ -4,7 +4,7 @@ const passport = require("passport");
 const session = require("express-session");
 const db = require("./database/db");
 const SequelizeStore = require("connect-session-sequelize")(session.Store);
-import { User } from "./database/Models";
+const { User } = require("./database/Models");
 // const passportLocalStrategy = require("passport-local").Strategy;
 // const cookieParser = require("cookie-parser");
 // const cookieSession = require("cookie-session");
