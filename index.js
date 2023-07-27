@@ -47,7 +47,7 @@ app.use(
   })
 );
 
-// app.use(cookieParser("secret"));
+app.use(cookieParser("secret"));
 
 app.use(
   session({
@@ -55,12 +55,12 @@ app.use(
     store: sessionStore,
     resave: false,
     saveUninitialized: true,
-    cookie: {
-      maxAge: 1000 * 60 * 60 * 24,
-      httpOnly: true,
-      // sameSite: "none", ONLY USE WHEN DEPLOY
-      // secure: true,
-    },
+    // cookie: {
+    //   maxAge: 1000 * 60 * 60 * 24,
+    //   httpOnly: true,
+    //   // sameSite: "none", ONLY USE WHEN DEPLOY
+    //   // secure: true,
+    // },
   })
 );
 // app.use(
