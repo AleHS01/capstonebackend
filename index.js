@@ -88,6 +88,20 @@ app.use(
 //   next();
 // });
 
+passport.serializeUser((user, cb) => {
+  cb(null, user.id);
+});
+
+passport.deserializeUser(async (id, cb) => {
+  console.log("User id in deserializeUser: ", id);
+  try {
+    const user = await User.findByPk(id);
+    cb(null, user);
+  } catch (error) {
+    cb(error, null);
+  }
+});
+
 app.use(passport.initialize());
 app.use(passport.session());
 require("./config/passportConfig")(passport); //to use same instance of passport in the entire server

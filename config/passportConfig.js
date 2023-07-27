@@ -68,17 +68,17 @@ module.exports = function (passport) {
 
   // -------------End of Google Auth--------------
 
-  passport.serializeUser((user, cb) => {
-    cb(null, user.id);
-  });
+  // passport.serializeUser((user, cb) => {
+  //   cb(null, user.id);
+  // });
 
-  passport.deserializeUser(async (id, cb) => {
-    console.log("User id in deserializeUser: ", id);
-    try {
-      const user = await User.findByPk(id);
-      cb(null, user);
-    } catch (error) {
-      cb(error, null);
-    }
-  });
+  // passport.deserializeUser(async (id, cb) => {
+  //   console.log("User id in deserializeUser: ", id);
+  //   try {
+  //     const user = await User.findByPk(id);
+  //     cb(null, user);
+  //   } catch (error) {
+  //     cb(error, null);
+  //   }
+  // });
 };
