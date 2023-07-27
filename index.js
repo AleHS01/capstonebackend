@@ -105,20 +105,20 @@ app.use(
 //   }
 // });
 
-passport.serializeUser((user, done) => {
-  console.log("serialize User is running");
-  done(null, user.id);
-});
+// passport.serializeUser((user, done) => {
+//   console.log("serialize User is running");
+//   done(null, user.id);
+// });
 
-passport.deserializeUser(async (id, done) => {
-  console.log("Deserialize is Running");
-  try {
-    const user = await User.findByPk(id);
-    done(null, user);
-  } catch (error) {
-    done(error, null);
-  }
-});
+// passport.deserializeUser(async (id, done) => {
+//   console.log("Deserialize is Running");
+//   try {
+//     const user = await User.findByPk(id);
+//     done(null, user);
+//   } catch (error) {
+//     done(error, null);
+//   }
+// });
 
 app.use(passport.initialize());
 app.use(passport.session());
