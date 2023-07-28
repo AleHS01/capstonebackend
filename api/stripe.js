@@ -93,7 +93,12 @@ router.post("/activate_committee", authenticateUser, async (req, res, next) => {
   const group_name = group.group_name;
   // Count the users in the group
   const usersInGroup = await User.count({ where: { GroupId } });
+  
+  const allUsersInGroup = await User.findAll({ where: { GroupId } });
+  const arrayOfUsersID= allUsersInGroup.map(item=>item.Stripe_Customer_id)
 
+  // const committee=await Active_Committee.findByPk(req.user.GroupId)
+  // await committee.update({arrayOfUsersID});
   try {
     // Create a product with the default price from the group
     const product = await stripe.products.create({
@@ -127,7 +132,8 @@ router.post("/activate_committee", authenticateUser, async (req, res, next) => {
         stripe_product_id: product.id, // Save the product ID in the Active_Committee table
         stripe_price_id: price.id, // Save the price ID in the Active_Committee table,
         individual_amount: Math.floor(group.amount/usersInGroup),
-        total_amount: group.amount
+        total_amount: group.amount,
+        arrayOfUsersID
       });
       console.log(Math.floor(group.amount/usersInGroup))
       
@@ -262,6 +268,51 @@ router.post("/checkPaymentStatus", authenticateUser, async (req, res, next) => {
   } catch (error) {
     console.log(error);
     next(error);
+  }
+});
+
+router.post("/payout_user", authenticateUser, async (req, res, next) => {
+    let random_index=0;
+  /**Draws a user instance and updates the array of Active_committtee */
+  function getRandomElementFromArray (arr) {
+    const randomIndex = Math.floor(Math.random() * arr.length);
+    random_index=randomIndex;
+    return arr[randomIndex];
+  }
+  
+  // async function updateArray(){
+  //   const committee=await Active_Committee.findByPk(req.user.id);
+  //   committee.update({arrayOfUsersID:arr.filter(item=item!==arr[random_index])})
+  // }
+  
+  try {
+    /**
+     * 1. draw a random user from the group. 
+     * 2. keep track of the drawn user
+     * 
+     * 3. Payout the drawn user.
+     * 
+     * Excess, try to configure this to each month*/
+
+    //1. 
+    const committee=await Active_Committee.findByPk(req.user.GroupId);
+    const chosenUser=getRandomElementFromArray(committee.arrayOfUsersID)
+    // const committee=await Active_Committee.findByPk(req.user.GroupId)
+
+    //2.
+
+    //3.
+    const payout = await stripe.payouts.create({
+      amount: committee.total_amount,
+      currency: 'usd',
+      destination: chosenUser.Stripe_Customer_id, // Use the customer ID as the destination to payout to their connected account
+    });
+
+    // updateArray()
+    res.status(200).json(payout)
+  } catch (error) {
+    next(error)
+    console.log(error)
   }
 });
 
