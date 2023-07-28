@@ -197,33 +197,73 @@ router.post("/is_Committee_Ready",authenticateUser,async(req,res,next)=>{
   }
 })
 
-router.post("/payment_intent",authenticateUser,async(req,res,next)=>{
+router.post("/payment_intent", authenticateUser, async (req, res, next) => {
   try {
-    const customerId=req.user.Stripe_Customer_id;
+    const paymentMethodId = req.body.paymentMethodId
 
-    const group=await Group.findByPk(req.user.GroupId)
-    const usersInGroup = await User.count({ where: { GroupId:req.user.GroupId } });
+    const group = await Group.findByPk(req.user.GroupId);
+    const usersInGroup = await User.findAll({ where: { GroupId: req.user.GroupId } });
+    console.log(usersInGroup)
 
-    //get the setup intent id
-    const setupIntents = await stripe.setupIntents.list({
-      customer: customerId,
-    });
+    // Calculate the amount to be charged per user
+    const amountPerUser = Math.floor(group.amount * 100 / usersInGroup.length);
 
-    const paymentIntent = await stripe.paymentIntents.create({
-      customer: customerId,
-      amount: Math.floor(group.amount*100/usersInGroup),
-      currency: 'usd',
+    // Create and confirm PaymentIntent for each user
+    const paymentIntents = await Promise.all(
+      usersInGroup.map(async (user) => {
+        const paymentIntent = await stripe.paymentIntents.create({
+          customer: user.Stripe_Customer_id,
+          amount: amountPerUser,
+          currency: 'usd',
+          payment_method: paymentMethodId,
+        });
+        console.log('PaymentIntent:', paymentIntent);
 
-    });
+        const confirmedPaymentIntent = await stripe.paymentIntents.confirm(paymentIntent.id);
+        console.log('Confirmed PaymentIntent:', confirmedPaymentIntent);
 
-    const send_toUser=await stripe.paymentIntents.confirm(paymentIntent.id,{payment_method: 'pm_card_visa'});
-    res.json(send_toUser)
+        return confirmedPaymentIntent;
+      })
+    );
 
+    res.json(paymentIntents);
   } catch (error) {
-    console.log(error)
-    next(error)
+    console.log(error);
+    next(error);
   }
-})
+});
+
+
+router.post("/updatePaymentStatus", authenticateUser, async (req, res) => {
+  try {
+    // Update the user record with the new payment status
+    await User.update(
+      { hasValidPayment: req.body.hasValidPayment },
+      { where: { id: req.user.id } }
+    );
+
+    res.status(200).send("Payment status updated successfully.");
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("Error updating payment status.");
+  }
+});
+
+router.post("/checkPaymentStatus", authenticateUser, async (req, res, next) => {
+  try {
+    const groupId = req.body.groupId; // Get the groupId from query parameters
+    const usersInGroup = await User.findAll({ where: { GroupId: groupId } });
+
+    // Check if each user has a valid payment method
+    const allUsersHavePaymentMethods = usersInGroup.every(user => user.hasValidPayment);
+    console.log("do all users inside this group have a valid payment?",allUsersHavePaymentMethods)
+
+    res.json(allUsersHavePaymentMethods);
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
 
 router.post("/testing",authenticateUser,async(req,res,next)=>{
   try {
