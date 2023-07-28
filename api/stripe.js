@@ -22,7 +22,7 @@ router.post("/create_customer",authenticateUser,async (req,res,next)=>{
     // add customer name here to update stripe information
     const updated_user=await user.update({Stripe_Customer_id:customer.id})
     await user.save()
-    res.status(200).json("Customer Added to Stripe")
+    res.status(200).json("Customer Added to Stripe")  
   } catch (error) {
     console.log(error)
     next(error)
@@ -46,7 +46,6 @@ router.post("/setup_intent",authenticateUser,async(req,res,next)=>{
       payment_method_types: ['card'],
     });
 
-
     //send relevant information to the front end
     res.json({
       setupIntent: setupIntent.client_secret,
@@ -59,7 +58,6 @@ router.post("/setup_intent",authenticateUser,async(req,res,next)=>{
     next(error)
   }
 })
-
 
 router.post("/create_checkout_session", authenticateUser, async (req, res, next) => {
   const user = await User.findByPk(req.user.id);
@@ -178,19 +176,49 @@ router.post("/is_Committee_Ready",authenticateUser,async(req,res,next)=>{
     const committee_users=await User.findAll({where:{
       GroupId:req.user.GroupId
     }})
-
-    for (const user of committee_users) {
-      // Getting the status of an attached payment method directly from stripe
-      const customer = await stripe.customers.retrieve(user.Stripe_Customer_id,{expand: ['sources']},);
-      console.log("DEFAULT_SOURCE",customer.sources.data.length)
-      if (customer.sources.data.length==0) {
+     const setupIntents = (await stripe.setupIntents.list({})).data;
+     for (const user of committee_users) {
+      const userStripeCustomerId = user.Stripe_Customer_id;
+  
+      // Check if the user's Stripe_Customer_id exists in the setupIntents array
+      const existingSetupIntent = setupIntents.find(intent => intent.customer === userStripeCustomerId);
+  
+      if (!existingSetupIntent) {
         res.send(false);
-        return;
+        return
       }
+
     }
-
-
     res.send(true)
+
+  } catch (error) {
+    console.log(error)
+    next(error)
+  }
+})
+
+router.post("/payment_intent",authenticateUser,async(req,res,next)=>{
+  try {
+    const customerId=req.user.Stripe_Customer_id;
+
+    const group=await Group.findByPk(req.user.GroupId)
+    const usersInGroup = await User.count({ where: { GroupId:req.user.GroupId } });
+
+    //get the setup intent id
+    const setupIntents = await stripe.setupIntents.list({
+      customer: customerId,
+    });
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      customer: customerId,
+      amount: Math.floor(group.amount*100/usersInGroup),
+      currency: 'usd',
+
+    });
+
+    const send_toUser=await stripe.paymentIntents.confirm(paymentIntent.id,{payment_method: 'pm_card_visa'});
+    res.json(send_toUser)
+
   } catch (error) {
     console.log(error)
     next(error)
@@ -210,6 +238,7 @@ router.post("/testing",authenticateUser,async(req,res,next)=>{
     next(error)
   }
 })
+
 
 module.exports= router;
 
