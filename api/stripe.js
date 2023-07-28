@@ -1,5 +1,6 @@
 
 const authenticateUser = require('../middleware/authenticateUser');
+const cron = require('node-cron');
 
 const stripe = require('stripe')('sk_test_51NU5vjGCLtTMWEv9ay2ULAYs2XP0v51AzuNc63mihcNN0dBkA9EPdlpr0uxnNIvbDjjoNs2ByHVQIeq7oE1JcdFS005uom0nlt');
 const router = require("express").Router()
@@ -302,11 +303,20 @@ router.post("/payout_user", authenticateUser, async (req, res, next) => {
     //2.
 
     //3.
-    const payout = await stripe.payouts.create({
-      amount: committee.total_amount,
-      currency: 'usd',
-      destination: chosenUser.Stripe_Customer_id, // Use the customer ID as the destination to payout to their connected account
+    cron.schedule('0 0 1 * *', async () => {
+      try {
+        const payout = await stripe.payouts.create({
+          amount: committee.total_amount,
+          currency: 'usd',
+          destination: chosenUser.Stripe_Customer_id,
+        });
+
+        console.log(`Payout successful for user ID ${chosenUser.id}`);
+      } catch (error) {
+        console.log(`Payout failed for user ID ${chosenUser.id}:`, error);
+      }
     });
+
 
     // updateArray()
     res.status(200).json(payout)
