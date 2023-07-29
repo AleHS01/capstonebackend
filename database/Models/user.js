@@ -12,11 +12,11 @@ const User = db.define(
     },
     first_name: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     last_name: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     balance: {
       type: DataTypes.DECIMAL(10, 2),
@@ -48,6 +48,15 @@ const User = db.define(
     Stripe_Customer_id: {
       type: DataTypes.STRING,
       allowNull: true,
+    },
+    hasValidPayment: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+    },
+    isAdmin: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
     },
   },
   {

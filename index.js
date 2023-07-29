@@ -45,14 +45,24 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // app.use(cors(corsOptions)); // Use the custom CORS middleware
 app.enable("trust proxy");
 
+// app.use(
+//   cors({
+//     origin: process.env.FRONTEND_URL || process.env.FRONTEND_URL_LOCAL,
+//     // methods: "GET,POST,PUT,DELETE",
+//     credentials: true,
+//     allowedHeaders:
+//       "Authorization, X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version",
+//     preflightContinue: true,
+//   })
+// );
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || process.env.FRONTEND_URL_LOCAL,
-    // methods: "GET,POST,PUT,DELETE",
+    origin: "http://localhost:3000",
+    methods: "GET,POST,PUT,DELETE",
     credentials: true,
     allowedHeaders:
       "Authorization, X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version",
-    preflightContinue: true,
   })
 );
 
