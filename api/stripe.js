@@ -199,7 +199,7 @@ router.post("/is_Committee_Ready",authenticateUser,async(req,res,next)=>{
 
 router.post("/payment_intent", authenticateUser, async (req, res, next) => {
   try {
-    const paymentMethodId = req.body.paymentMethodId
+    // const paymentMethodId = req.body.paymentMethodId
 
     const group = await Group.findByPk(req.user.GroupId);
     const usersInGroup = await User.findAll({ where: { GroupId: req.user.GroupId } });
@@ -215,11 +215,11 @@ router.post("/payment_intent", authenticateUser, async (req, res, next) => {
           customer: user.Stripe_Customer_id,
           amount: amountPerUser,
           currency: 'usd',
-          payment_method: paymentMethodId,
+          // payment_method: paymentMethodId,
         });
         console.log('PaymentIntent:', paymentIntent);
 
-        const confirmedPaymentIntent = await stripe.paymentIntents.confirm(paymentIntent.id);
+        const confirmedPaymentIntent = await stripe.paymentIntents.confirm(paymentIntent.id, {payment_method: 'pm_card_visa'});
         console.log('Confirmed PaymentIntent:', confirmedPaymentIntent);
 
         return confirmedPaymentIntent;
