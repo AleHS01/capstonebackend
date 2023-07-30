@@ -14,6 +14,16 @@ const Group = db.define("Group", {
     type: DataTypes.INTEGER,
     allowNull: true,
   },
+  isActive: {
+    type: DataTypes.BOOLEAN,
+    allowNull: true,
+    defaultValue: false,
+  },
+  isOrdered: {
+    type: DataTypes.BOOLEAN,
+    allowNull: true,
+    defaultValue: false,
+  },
 });
 
 module.exports = Group;

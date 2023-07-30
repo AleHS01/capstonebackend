@@ -58,6 +58,10 @@ const User = db.define(
       allowNull: false,
       defaultValue: false,
     },
+    committee_order: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
   },
   {
     hooks: {

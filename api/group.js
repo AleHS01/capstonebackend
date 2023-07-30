@@ -1,4 +1,5 @@
 const router = require("express").Router();
+const { Op } = require("sequelize");
 const { Group, User, Active_Committee } = require("../database/Models");
 const authenticateUser = require("../middleware/authenticateUser");
 
@@ -89,7 +90,7 @@ router.post("/all_members", authenticateUser, async (req, res, next) => {
 
 router.post("/activate_group", authenticateUser, async (req, res, next) => {
   const { GroupId } = req.user;
-  const { group_name } = await Group.findByPk(GroupId);
+  const group = await Group.findByPk(GroupId);
 
   const today_date = new Date();
   const end_date = new Date();
@@ -103,13 +104,49 @@ router.post("/activate_group", authenticateUser, async (req, res, next) => {
 
   const new_committee = await Active_Committee.create({
     id: GroupId,
-    committee_name: group_name,
+    committee_name: group.group_name,
     start_date: today_date,
     end_date: end_date.setMonth(end_date.getMonth() + usersInGroup),
     activated: true,
   });
 
+  group.isActive = true;
+  await group.save();
+
   res.status(200).json(new_committee);
+});
+router.put("/ordered", authenticateUser, async (req, res, next) => {
+  const { GroupId } = req.body;
+  try {
+    const group = await Group.findByPk(GroupId);
+    group.isOrdered = true;
+    group.save();
+    res.status(200).send("Group is now Ordered");
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
+
+router.post("/payout-order", authenticateUser, async (req, res, next) => {
+  const { GroupId } = req.user;
+
+  try {
+    const members = await User.findAll({
+      where: {
+        committee_order: {
+          [Op.not]: null, // Fetch only users with valid orders
+        },
+        GroupId,
+      },
+      attributes: ["id", "first_name", "committee_order"],
+    });
+
+    res.json(members);
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
 });
 
 module.exports = router;

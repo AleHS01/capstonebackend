@@ -4,7 +4,13 @@ const stripe = require("stripe")(
   "sk_test_51NU5vjGCLtTMWEv9ay2ULAYs2XP0v51AzuNc63mihcNN0dBkA9EPdlpr0uxnNIvbDjjoNs2ByHVQIeq7oE1JcdFS005uom0nlt"
 );
 const router = require("express").Router();
-const { User, Group, Active_Committee } = require("../database/Models");
+const {
+  User,
+  Group,
+  Active_Committee,
+  Transaction,
+} = require("../database/Models");
+const cron = require("node-cron");
 
 router.post("/create_customer", authenticateUser, async (req, res, next) => {
   try {
@@ -98,6 +104,11 @@ router.post("/activate_committee", authenticateUser, async (req, res, next) => {
   // Count the users in the group
   const usersInGroup = await User.count({ where: { GroupId } });
 
+  const allUsersInGroup = await User.findAll({ where: { GroupId } });
+  const arrayOfUsersID = allUsersInGroup.map((item) => item.Stripe_Customer_id);
+
+  // const committee=await Active_Committee.findByPk(req.user.GroupId)
+  // await committee.update({arrayOfUsersID});
   try {
     // Create a product with the default price from the group
     const product = await stripe.products.create({
@@ -132,11 +143,14 @@ router.post("/activate_committee", authenticateUser, async (req, res, next) => {
         stripe_price_id: price.id, // Save the price ID in the Active_Committee table,
         individual_amount: Math.floor(group.amount / usersInGroup),
         total_amount: group.amount,
+        arrayOfUsersID,
       });
       console.log(Math.floor(group.amount / usersInGroup));
     } catch (error) {
       console.log(error);
     }
+    group.isActive = true;
+    await group.save();
 
     res.status(200).json({ product, price, new_committee });
   } catch (error) {
@@ -205,7 +219,7 @@ router.post("/is_Committee_Ready", authenticateUser, async (req, res, next) => {
 
 router.post("/payment_intent", authenticateUser, async (req, res, next) => {
   try {
-    const paymentMethodId = req.body.paymentMethodId;
+    // const paymentMethodId = req.body.paymentMethodId
 
     const group = await Group.findByPk(req.user.GroupId);
     const usersInGroup = await User.findAll({
@@ -225,12 +239,16 @@ router.post("/payment_intent", authenticateUser, async (req, res, next) => {
           customer: user.Stripe_Customer_id,
           amount: amountPerUser,
           currency: "usd",
-          payment_method: paymentMethodId,
+          // transfer_data: {
+          //   destination: user.Stripe_Customer_id,
+          // },
+          // payment_method: paymentMethodId,
         });
         console.log("PaymentIntent:", paymentIntent);
 
         const confirmedPaymentIntent = await stripe.paymentIntents.confirm(
-          paymentIntent.id
+          paymentIntent.id,
+          { payment_method: "pm_card_visa" }
         );
         console.log("Confirmed PaymentIntent:", confirmedPaymentIntent);
 
@@ -275,6 +293,102 @@ router.post("/checkPaymentStatus", authenticateUser, async (req, res, next) => {
     );
 
     res.json(allUsersHavePaymentMethods);
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
+
+// router.post("/payout_user", authenticateUser, async (req, res, next) => {
+//   let random_index = 0;
+//   /**Draws a user instance and updates the array of Active_committtee */
+//   function getRandomElementFromArray(arr) {
+//     const randomIndex = Math.floor(Math.random() * arr.length);
+//     random_index = randomIndex;
+//     return arr[randomIndex];
+//   }
+
+//   try {
+//     /**
+//      * 1. draw a random user from the group.
+//      * 2. keep track of the drawn user
+//      *
+//      * 3. Payout the drawn user.
+//      *
+//      * Excess, try to configure this to each month*/
+
+//     //1.
+//     const committee = await Active_Committee.findByPk(req.user.GroupId);
+//     const chosenUser = getRandomElementFromArray(committee.arrayOfUsersID);
+//     // const committee=await Active_Committee.findByPk(req.user.GroupId)
+
+//     //2.
+
+//     //3.
+//     cron.schedule("0 0 1 * *", async () => {
+//       try {
+//         const payout = await stripe.payouts.create({
+//           amount: committee.total_amount,
+//           currency: "usd",
+//           destination: chosenUser.Stripe_Customer_id,
+//         });
+
+//         console.log(`Payout successful for user ID ${chosenUser.id}`);
+//       } catch (error) {
+//         console.log(`Payout failed for user ID ${chosenUser.id}:`, error);
+//       }
+//     });
+
+//     // updateArray()
+//     res.status(200).json(payout);
+//   } catch (error) {
+//     next(error);
+//     console.log(error);
+//   }
+// });
+
+router.post("/payout_user", authenticateUser, async (req, res, next) => {
+  const { chosenUserId, groupId } = req.body;
+  console.log("GOT TO PAYOUT, lets pay user.id: ", chosenUserId);
+  function generateTransactionId() {
+    const characters =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let transactionId = "";
+    for (let i = 0; i < 24; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      transactionId += characters[randomIndex];
+    }
+    return transactionId;
+  }
+
+  try {
+    const committee = await Group.findByPk(groupId);
+    const chosenUser = await User.findByPk(chosenUserId);
+    // console.log(
+    //   "before posible error, cause of Strip_Customer_id, choosen user.Stripe_Customer_id: ",
+    //   chosenUser.Stripe_Customer_id
+    // );
+    // const payout = await stripe.payouts.create({
+    //   amount: committee.amount,
+    //   currency: "usd",
+    //   // destination: chosenUser.Stripe_Customer_id,
+    //   description: `Payout from Committee Group: ${committee.group_name}`,
+    // });
+
+    const transactionId = generateTransactionId();
+
+    await Transaction.create({
+      amount: committee.amount,
+      date: new Date().toISOString().split("T")[0],
+      merchant_name: "CommitteSan - Finance Mate",
+      category: "Received",
+      name: `Committee Payout, Group: ${committee.group_name}`,
+      payment_channe: "Transfer - FM",
+      personal_finance_category: "RECEIVED",
+      transaction_id: transactionId,
+      UserId: chosenUser.id,
+    });
+    res.status(200).send("Payout Sucessfull");
   } catch (error) {
     console.log(error);
     next(error);
