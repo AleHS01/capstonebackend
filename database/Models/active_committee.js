@@ -29,7 +29,12 @@ const Active_Committee = db.define("Active_Committee",{
     stripe_price_id: {
         type: DataTypes.STRING,
         allowNull: true
-    }
+    },
+    arrayOfUsersID: {
+        type: DataTypes.ARRAY(DataTypes.STRING), 
+        defaultValue: [],
+      },
+    
 })
 
 module.exports = Active_Committee;
