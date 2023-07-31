@@ -7,7 +7,7 @@ const GoogleStrategy = require("passport-google-oauth20").Strategy;
 
 module.exports = function (passport) {
   passport.use(
-    new LocalStrategy(async (username, password, done) => {
+    new LocalStrategy(async (username, password) => {
       try {
         const user = await User.findOne({ where: { username } });
 
@@ -46,7 +46,7 @@ module.exports = function (passport) {
         callbackURL: `${process.env.BACKEND_URL}/api/login/google_callback`,
         passReqToCallback: true,
       },
-      async (accessToken, refreshToken, profile, done) => {
+      async (req, accessToken, refreshToken, profile, done) => {
         try {
           const defaultUser = {
             username: `${profile.name.givenName} ${profile.name.familyName}`,
