@@ -46,33 +46,54 @@ module.exports = function (passport) {
         callbackURL: `${process.env.BACKEND_URL}/api/login/google_callback`,
         passReqToCallback: true,
       },
-      async (req, accessToken, refreshToken, profile, done) => {
-        try {
-          const defaultUser = {
-            username: `${profile.name.givenName} ${profile.name.familyName}`,
-            email: profile.emails[0].value,
-            googleId: profile.id,
-            first_name: profile.name.givenName,
-            last_name: profile.name.familyName,
-          };
+      async (req, accessToken, refreshToken, profile, cb) => {
+        const defaultUser = {
+          username: `${profile.name.givenName} ${profile.name.familyName}`,
+          email: profile.emails[0].value,
+          googleId: profile.id,
+          first_name: profile.name.givenName,
+          last_name: profile.name.familyName,
+        };
 
-          // console.log("google Profile:", profile);
-          const [user] = await User.findOrCreate({
-            where: { googleId: defaultUser.googleId },
-            defaults: defaultUser,
-          });
-          done(null, user);
-        } catch (error) {
-          done(error);
+        // console.log("google Profile:", profile);
+        const user = await User.findOrCreate({
+          where: { googleId: profile.id },
+          defaults: defaultUser,
+        }).catch((err) => {
+          console.log(err);
+          cb(err, null);
+        });
+        if (user && user[0]) {
+          return cb(null, user && user[0]);
         }
-        // ).catch((err) => {
-        //   console.log(err);
-        //   done(err, null);
-        // });
-        // if (user && user[0]) {
-        //   return done(null, user && user[0]);
-        // }
       }
+      // async (req, accessToken, refreshToken, profile, done) => {
+      //   try {
+      //     const defaultUser = {
+      //       username: `${profile.name.givenName} ${profile.name.familyName}`,
+      //       email: profile.emails[0].value,
+      //       googleId: profile.id,
+      //       first_name: profile.name.givenName,
+      //       last_name: profile.name.familyName,
+      //     };
+
+      //     // console.log("google Profile:", profile);
+      //     const [user] = await User.findOrCreate({
+      //       where: { googleId: defaultUser.googleId },
+      //       defaults: defaultUser,
+      //     });
+      //     done(null, user);
+      //   } catch (error) {
+      //     done(error);
+      //   }
+      //   // ).catch((err) => {
+      //   //   console.log(err);
+      //   //   done(err, null);
+      //   // });
+      //   // if (user && user[0]) {
+      //   //   return done(null, user && user[0]);
+      //   // }
+      // }
     )
   );
 
